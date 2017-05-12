@@ -36,22 +36,25 @@ public class Layer implements Cloneable, EDProtocol {
 				answer.setData(((SNode) myNode).getBD()[msg.getQuery()]);
 				
 				answer.setPath(msg.getPath());
-				System.out.println("\tQuery received: "+msg.getQuery()+"- Requester Node "+msg.getRemitent()+"- Query value "+answer.getData());
+				System.out.println("\tQuery received [node_destination, data_id, data] = ["+msg.getDestination()+", "+msg.getQuery()+", ?]");
+				System.out.println("\tQuery answered [node_destination, data_id, data] = ["+answer.getDestination()+", "+answer.getQuery()+", "+answer.getData()+"]");
 
 				sendmessage(myNode, layerId, (Object) answer);
 				
 			}
 			else{
 				if(msg.getPath().isEmpty()){
-					System.out.println("\tQuery answered: "+msg.getQuery()+"- Node: "+msg.getRemitent()+"- Query Value: "+msg.getData());
+					System.out.println("\tQuery answered [node_destination, data_id, data] = ["+msg.getDestination()+", "+msg.getQuery()+", "+msg.getData()+"]");
 					((SNode) myNode).cacheUpdate(msg.getRemitent(), msg.getQuery(), msg.getData());
+					System.out.println("\tCache update");
 					((SNode) myNode).cacheShow();
 				}
 				else{
 					((SNode) myNode).cacheUpdate(msg.getRemitent(), msg.getQuery(), msg.getData());
+					System.out.println("\tCache update");
 					((SNode)myNode).cacheShow();
-					
 					msg.setDestination(msg.getPath().pop());
+					System.out.println("\tQuery transmited [node_destination, data_id, data] = ["+msg.getDestination()+", "+msg.getQuery()+", "+msg.getData()+"]");
 					sendmessage(myNode,layerId,msg);				
 				}
 			}
@@ -59,17 +62,33 @@ public class Layer implements Cloneable, EDProtocol {
 		else{
 			if(msg.getRemitent() != myNode.getID()){
 				if( ((SNode) myNode).cacheReview(msg.getDestination(), msg.getQuery())){
-					System.out.println("Lo tengo en caché");
+					System.out.println("\tCache hit");
+					int[] hit = ((SNode) myNode).cacheHit(msg.getDestination(), msg.getQuery());					
+					Message answer = new Message(msg.getPath().pop(),msg.getQuery(),msg.getDestination());
+					answer.setData(hit[2]);
+					answer.setPath(msg.getPath());
+					System.out.println("\tQuery answered [node_destination, data_id, data] = ["+answer.getDestination()+", "+answer.getQuery()+", "+answer.getData()+"]");
+					sendmessage(myNode, layerId, (Object) answer);	
 				}
 				else{
-					System.out.println("\tQuery transmiter: "+msg.getQuery()+"- Query Node: "+msg.getDestination()+"- Query Value: ? ");
+					System.out.println("\tCache miss");
+					System.out.println("\tQuery transmited [node_destination, data_id, data] = ["+msg.getDestination()+", "+msg.getQuery()+", ?]");
 					msg.getPath().push( (int) myNode.getID());
 					sendmessage(myNode,layerId,msg);
 				}
 			}
 			else{
-				System.out.println("\tQuery generator: "+msg.getQuery()+"- Query Node: "+msg.getDestination()+"- Query Value: ? ");
-				sendmessage(myNode,layerId,msg);
+				if( ((SNode) myNode).cacheReview(msg.getDestination(), msg.getQuery())){
+					System.out.println("\tCache hit");
+					int[] hit = new int[3];
+					hit = ((SNode) myNode).cacheHit(msg.getDestination(), msg.getQuery());
+					System.out.println("\tQuery answered [node_destination, data_id, data] = ["+hit[0]+", "+hit[1]+", "+hit[2]+"]");
+				}
+				else{
+					System.out.println("\tCache miss");
+					System.out.println("\tQuery generated [node_destination, data_id, data] = ["+msg.getDestination()+", "+msg.getQuery()+", ?]");
+					sendmessage(myNode,layerId,msg);
+				}
 			}
 		}
 		getStats();

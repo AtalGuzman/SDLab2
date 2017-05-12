@@ -15,7 +15,6 @@ public class Initialization implements Control {
 	int d;
 	int c;
 	int BDSize;
-	int argExample;
 
 	public Initialization(String prefix) {
 		this.prefix = prefix;
@@ -31,12 +30,13 @@ public class Initialization implements Control {
 		// Configuration.getInt retorna el número del argumento
 		// que se encuentra en el archivo de configuración.
 		// También hay Configuration.getBoolean, .getString, etc...
+		System.out.println("NET PARAMETERS");
 		this.d = Configuration.getInt(prefix + ".d");
 		this.c = Configuration.getInt(prefix + ".c");
 		this.BDSize = d*Network.size();
-		System.out.println("DB Size: "+d);
-		System.out.println("Cache Size: "+c);
-		//System.out.println("Arg: " + argExample);
+		System.out.println("\tNetwork size: "+Network.size());
+		System.out.println("\tDB Size: "+d);
+		System.out.println("\tCache Size: "+c);
 	}
 
 	/**
@@ -54,17 +54,20 @@ public class Initialization implements Control {
 		 */
 		System.out.println("INICIALIZATION");
 		int size = Network.size();
+		
 		for(int i = 0; i < size; i++){
 			SNode node = (SNode) Network.get(i);
 			long id = node.getID();
 			((Linkable) node.getProtocol(0)).addNeighbor(Network.get((int)(id+1)%size));
 		}
+		
 		for(int i = 0; i < size; i++){
 			SNode node = (SNode) Network.get(i);
 			node.setDHT(DHTInicialization(node,1+2*d));
 			node.setCache(CacheInicialization());
 			node.setBD(BDInicialization());
 		}	
+
 		BDPopulate();
 
 		for(int i = 0; i < size; i++){
@@ -77,7 +80,9 @@ public class Initialization implements Control {
 			for(int j = 0; j < node.getBD().length;j++){
 				if(node.getDHT()[j] >= 0) System.out.println("\t\tBD: "+node.getBD()[j]);
 			}
+			node.cacheShow();
 		}
+		
 		
 		return true;
 	}
@@ -97,27 +102,27 @@ public class Initialization implements Control {
 	
 	private int[][] CacheInicialization(){
 		int[][] cache =  new int[this.c][3];
+		
 		for(int i = 0; i < this.c; i++){
 			for(int j = 0; j < 3; j++){
 				cache[i][j] = -1;
 			}
 		}
-		
 		return cache;
 	}
 	
 	private int[] DHTInicialization(SNode node, int DHTSize){
 		int[] _dht = new int[DHTSize];
+		int x = 1;
+		
 		for(int i = 0; i < DHTSize; i++){
 			_dht[i] = -1;
 		}
-		int x = 1;
 		while(Math.pow(2,x)<=Network.size()){
 			int dis = new Double(Network.size()/Math.pow(2,x)).intValue();
 			_dht[x-1] = ((int)node.getID()+dis)%Network.size(); 
 			x++;
 		}
-		
 		return _dht;
 	}
 }
