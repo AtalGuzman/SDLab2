@@ -5,6 +5,7 @@ import peersim.core.CommonState;
 import peersim.core.Control;
 import peersim.core.Linkable;
 import peersim.core.Network;
+import java.util.Stack;
 
 public class Initialization implements Control {
 	String prefix;
@@ -95,7 +96,13 @@ public class Initialization implements Control {
 	}
 	
 	private int[][] CacheInicialization(){
-		return new int[this.c][3];
+		int[][] cache =  new int[this.c][3];
+		for(int j = 0; j < 3; j++){
+			for(int i = 0; i < this.c; i++){
+				cache[i][j] = -1;
+			}
+		}
+		return cache;
 	}
 	
 	private int[] DHTInicialization(SNode node, int DHTSize){

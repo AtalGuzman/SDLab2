@@ -1,6 +1,7 @@
 package cl.usach.sd;
 
 import peersim.core.GeneralNode;
+import java.util.Stack;
 
 public class SNode extends GeneralNode {
 	private int[] DHT;
@@ -28,4 +29,16 @@ public class SNode extends GeneralNode {
 	public void setBD(int[] bD) {
 		BD = bD;
 	}
+	
+	public boolean cacheReview(int node, int dataId){
+		int[] result = new int[]{-1,-1,-1};
+		boolean answer = false;
+		for(int i = 0; i< this.Cache.length; i++){
+			if(node == this.Cache[i][0] && dataId == this.Cache[i][0]){
+				answer = true;
+			}
+		}
+		return answer;
+	}
+	
 }

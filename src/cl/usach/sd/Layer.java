@@ -8,14 +8,16 @@ import peersim.core.Network;
 import peersim.core.Node;
 import peersim.dynamics.WireKOut;
 import peersim.edsim.EDProtocol;
+import peersim.edsim.EDSimulator;
 import peersim.transport.Transport;
+import java.util.Stack;
 
 public class Layer implements Cloneable, EDProtocol {
 	private static final String PAR_TRANSPORT = "transport";
 	private static String prefix = null;
 	private int transportId;
 	private int layerId;
-
+	
 	/**
 	 * MÃ©todo en el cual se va a procesar el mensaje que ha llegado al Nodo
 	 * desde otro Nodo. Cabe destacar que el mensaje va a ser el evento descrito
@@ -24,14 +26,48 @@ public class Layer implements Cloneable, EDProtocol {
 	@Override
 	public void processEvent(Node myNode, int layerId, Object event) {
 		Message msg = (Message) event;
+		System.out.println("Current_Node: "+myNode.getID() );
+		
 		if(msg.getDestination() == myNode.getID()){
-			System.out.println("Tengo que responderle a este tipo");
+			if(msg.getData() < 0){
+				
+				System.out.println("Tengo que responderle a "+msg.getRemitent());
+				
+				Message answer = new Message(msg.getPath().pop(),msg.getQuery(),msg.getDestination());
+				
+				answer.setData(((SNode) myNode).getBD()[msg.getQuery()]);
+				
+				answer.setPath(msg.getPath());
+				
+				System.out.println("Message destination: "+answer.getDestination()+ " Message Query"+answer.getQuery() + " Message remitent "+answer.getRemitent()+" Message data "+answer.getData()+" el path es "+answer.getPath());
+				
+				sendmessage(myNode, layerId, (Object) answer);
+				
+			}
+			else{
+				if(msg.getPath().isEmpty()){
+					System.out.println("He recibido la consulta "+msg.getQuery()+" desde el nodo "+msg.getRemitent()+" y tiene valor "+msg.getData());
+				}
+				else{
+					System.out.println("Debo agregar a caché la información y enviar hacia a trás");
+					msg.setDestination(msg.getPath().pop());
+					sendmessage(myNode,layerId,msg);				
+				}
+			}
 		}
 		else{
 			if(msg.getRemitent() != myNode.getID()){
-				System.out.println("Debo revisar caché un envío como intermediario");
+				if( ((SNode) myNode).cacheReview(msg.getDestination(), msg.getQuery())){
+					System.out.println("Lo tengo en caché");
+				}
+				else{
+					System.out.println("*");
+					msg.getPath().push( (int) myNode.getID());
+					sendmessage(myNode,layerId,msg);
+				}
 			}
 			else{
+				System.out.println("*");
 				sendmessage(myNode,layerId,msg);
 			}
 		}
@@ -43,34 +79,34 @@ public class Layer implements Cloneable, EDProtocol {
 	}
 
 	public void sendmessage(Node currentNode, int layerId, Object msg) {
-		Node bestNextNode = ((Linkable) currentNode.getProtocol(0)).getNeighbor(0);
-		int destination = ((Message) msg).getDestination();
-		int minDistance = moduleMinus(destination, (int) bestNextNode.getID());
-		int DHTElements = 0;
-		
-		while(((SNode) currentNode).getDHT()[DHTElements]>0) DHTElements++;
-		System.out.println("El destino es "+((Message) msg).getDestination());
-		System.out.println("El remitente es "+ ((Message) msg).getRemitent());
-		
-		for(int i = 0; i < DHTElements;i++){
-			System.out.println("La mejor distancias es "+minDistance+" hacia el nodo "+bestNextNode.getID());
-			int tempDistance = moduleMinus(((SNode) currentNode).getDHT()[i],destination);
-			if(tempDistance<minDistance){				
-				bestNextNode = Network.get(((SNode) currentNode).getDHT()[i]);
-				minDistance = tempDistance;
+		Node bestNextNode;
+		if( ((Message) msg).getData() < 0){
+			System.out.println("Este mensaje corresponde a una Query");
+			bestNextNode = ((Linkable) currentNode.getProtocol(0)).getNeighbor(0);
+			int destination = ((Message) msg).getDestination();
+			int minDistance = moduleMinus(destination, (int) bestNextNode.getID());
+			
+			int DHTElements = 0;
+			while(((SNode) currentNode).getDHT()[DHTElements]>0) DHTElements++;
+			
+			for(int i = 0; i < DHTElements;i++){
+				int tempDistance = moduleMinus(destination,((SNode) currentNode).getDHT()[i]);
+				if(tempDistance<minDistance){				
+					bestNextNode = Network.get(((SNode) currentNode).getDHT()[i]);
+					minDistance = tempDistance;
+				}
 			}
+			
 		}
-
-		/**
-		 * EnviÃ³ del dato a travÃ©s de la capa de transporte, la cual enviarÃ¡
-		 * segÃºn el ID del emisor y el receptor
-		 */
+		else{
+			System.out.println("Este mensaje corresponde a una Respuesta");
+			bestNextNode =  Network.get(((Message) msg).getDestination());
+			//System.out.println(bestNextNode);
+			//System.out.println("*");
+		}
 		((Transport) currentNode.getProtocol(transportId)).send(currentNode, bestNextNode, msg, layerId);
-		// Otra forma de hacerlo
-		// ((Transport)
-		// currentNode.getProtocol(FastConfig.getTransport(layerId))).send(currentNode,
-		// searchNode(sendNode), message, layerId);
-
+		//System.out.println("*");
+		return;
 	}
 	
 	private int moduleMinus(int a, int b) {

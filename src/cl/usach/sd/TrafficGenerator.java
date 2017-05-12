@@ -1,5 +1,6 @@
 package cl.usach.sd;
 
+import java.util.Stack;
 import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
@@ -35,7 +36,7 @@ public class TrafficGenerator implements Control {
 		// Node arg2: Nodo por el cual inicia el envío del dato
 		// int arg3: Número de la capa del protocolo que creamos (en este caso
 		// de layerId)
-		System.out.println("Message destination: "+msg.getDestination()+ " Message Query"+msg.getQuery() + " Message remitent "+msg.getRemitent());
+		msg.getPath().push( (int) initNode.getID());
 		EDSimulator.add(0, msg, initNode, layerId);
 
 		return false;
