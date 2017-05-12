@@ -24,6 +24,7 @@ public class TrafficGenerator implements Control {
 	
 		//Parámetros para la creación del mensaje	
 		int sendId = CommonState.r.nextInt(Network.size());
+		while(sendId == initNode.getID()) sendId = CommonState.r.nextInt(Network.size());
 		int query = CommonState.r.nextInt(initNode.getBD().length);
 		
 		//Creación del mensaje

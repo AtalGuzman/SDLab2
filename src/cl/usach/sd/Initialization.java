@@ -69,10 +69,10 @@ public class Initialization implements Control {
 
 		for(int i = 0; i < size; i++){
 			SNode node = (SNode) Network.get(i);
-			System.out.println("Node "+ node.getID()+" Neighbor "+ Network.get((int)((Linkable) node.getProtocol(0)).getNeighbor(0).getID()).getID());
+			System.out.println("Node "+ node.getID()+" Neighbour "+ Network.get((int)((Linkable) node.getProtocol(0)).getNeighbor(0).getID()).getID());
 			System.out.println("\tDHT");
 			for(int j = 0; j < node.getDHT().length;j++){
-				if(node.getDHT()[j] >= 0) System.out.println("\t\tNodo DHT: "+node.getDHT()[j]);
+				if(node.getDHT()[j] >= 0) System.out.println("\t\tNode DHT: "+node.getDHT()[j]);
 			}
 			for(int j = 0; j < node.getBD().length;j++){
 				if(node.getDHT()[j] >= 0) System.out.println("\t\tBD: "+node.getBD()[j]);
@@ -97,11 +97,12 @@ public class Initialization implements Control {
 	
 	private int[][] CacheInicialization(){
 		int[][] cache =  new int[this.c][3];
-		for(int j = 0; j < 3; j++){
-			for(int i = 0; i < this.c; i++){
+		for(int i = 0; i < this.c; i++){
+			for(int j = 0; j < 3; j++){
 				cache[i][j] = -1;
 			}
 		}
+		
 		return cache;
 	}
 	

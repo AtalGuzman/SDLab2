@@ -30,26 +30,27 @@ public class Layer implements Cloneable, EDProtocol {
 		
 		if(msg.getDestination() == myNode.getID()){
 			if(msg.getData() < 0){
-				
-				System.out.println("Tengo que responderle a "+msg.getRemitent());
-				
+								
 				Message answer = new Message(msg.getPath().pop(),msg.getQuery(),msg.getDestination());
 				
 				answer.setData(((SNode) myNode).getBD()[msg.getQuery()]);
 				
 				answer.setPath(msg.getPath());
-				
-				System.out.println("Message destination: "+answer.getDestination()+ " Message Query"+answer.getQuery() + " Message remitent "+answer.getRemitent()+" Message data "+answer.getData()+" el path es "+answer.getPath());
-				
+				System.out.println("\tQuery received: "+msg.getQuery()+"- Requester Node "+msg.getRemitent()+"- Query value "+answer.getData());
+
 				sendmessage(myNode, layerId, (Object) answer);
 				
 			}
 			else{
 				if(msg.getPath().isEmpty()){
-					System.out.println("He recibido la consulta "+msg.getQuery()+" desde el nodo "+msg.getRemitent()+" y tiene valor "+msg.getData());
+					System.out.println("\tQuery answered: "+msg.getQuery()+"- Node: "+msg.getRemitent()+"- Query Value: "+msg.getData());
+					((SNode) myNode).cacheUpdate(msg.getRemitent(), msg.getQuery(), msg.getData());
+					((SNode) myNode).cacheShow();
 				}
 				else{
-					System.out.println("Debo agregar a caché la información y enviar hacia a trás");
+					((SNode) myNode).cacheUpdate(msg.getRemitent(), msg.getQuery(), msg.getData());
+					((SNode)myNode).cacheShow();
+					
 					msg.setDestination(msg.getPath().pop());
 					sendmessage(myNode,layerId,msg);				
 				}
@@ -61,13 +62,13 @@ public class Layer implements Cloneable, EDProtocol {
 					System.out.println("Lo tengo en caché");
 				}
 				else{
-					System.out.println("*");
+					System.out.println("\tQuery transmiter: "+msg.getQuery()+"- Query Node: "+msg.getDestination()+"- Query Value: ? ");
 					msg.getPath().push( (int) myNode.getID());
 					sendmessage(myNode,layerId,msg);
 				}
 			}
 			else{
-				System.out.println("*");
+				System.out.println("\tQuery generator: "+msg.getQuery()+"- Query Node: "+msg.getDestination()+"- Query Value: ? ");
 				sendmessage(myNode,layerId,msg);
 			}
 		}
@@ -81,7 +82,6 @@ public class Layer implements Cloneable, EDProtocol {
 	public void sendmessage(Node currentNode, int layerId, Object msg) {
 		Node bestNextNode;
 		if( ((Message) msg).getData() < 0){
-			System.out.println("Este mensaje corresponde a una Query");
 			bestNextNode = ((Linkable) currentNode.getProtocol(0)).getNeighbor(0);
 			int destination = ((Message) msg).getDestination();
 			int minDistance = moduleMinus(destination, (int) bestNextNode.getID());
@@ -99,7 +99,6 @@ public class Layer implements Cloneable, EDProtocol {
 			
 		}
 		else{
-			System.out.println("Este mensaje corresponde a una Respuesta");
 			bestNextNode =  Network.get(((Message) msg).getDestination());
 			//System.out.println(bestNextNode);
 			//System.out.println("*");
