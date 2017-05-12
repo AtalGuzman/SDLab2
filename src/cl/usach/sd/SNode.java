@@ -2,12 +2,12 @@ package cl.usach.sd;
 
 import peersim.core.GeneralNode;
 
-public class Node extends GeneralNode {
+public class SNode extends GeneralNode {
 	private int[] DHT;
 	private int[][] Cache;
 	private int[] BD;
 	
-	public Node(String prefix) {
+	public SNode(String prefix) {
 		super(prefix);
 	}
 	public int[] getDHT() {

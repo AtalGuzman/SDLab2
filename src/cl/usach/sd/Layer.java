@@ -23,9 +23,18 @@ public class Layer implements Cloneable, EDProtocol {
 	 */
 	@Override
 	public void processEvent(Node myNode, int layerId, Object event) {
-		Message message = (Message) event;
-		sendmessage(myNode, layerId, message);
-
+		Message msg = (Message) event;
+		if(msg.getDestination() == myNode.getID()){
+			System.out.println("Tengo que responderle a este tipo");
+		}
+		else{
+			if(msg.getRemitent() != myNode.getID()){
+				System.out.println("Debo revisar cach� un env�o como intermediario");
+			}
+			else{
+				sendmessage(myNode,layerId,msg);
+			}
+		}
 		getStats();
 	}
 
@@ -33,36 +42,46 @@ public class Layer implements Cloneable, EDProtocol {
 		Observer.message.add(1);
 	}
 
-	public void sendmessage(Node currentNode, int layerId, Object message) {
-		/**
-		 * Random degree
-		 */
-		int randDegree = CommonState.r.nextInt(((Linkable) currentNode.getProtocol(0)).degree());
+	public void sendmessage(Node currentNode, int layerId, Object msg) {
+		Node bestNextNode = ((Linkable) currentNode.getProtocol(0)).getNeighbor(0);
+		int destination = ((Message) msg).getDestination();
+		int minDistance = moduleMinus(destination, (int) bestNextNode.getID());
+		int DHTElements = 0;
 		
-		/**
-		 * sendNode ID del Nodo que se debe enviar
-		 */
-		Node sendNode = ((Linkable) currentNode.getProtocol(0)).getNeighbor(randDegree);
-
-		System.out.println("CurrentNode: " + currentNode.getID() + " | Degree: " + ((Linkable) currentNode.getProtocol(0)).degree());
+		while(((SNode) currentNode).getDHT()[DHTElements]>0) DHTElements++;
+		System.out.println("El destino es "+((Message) msg).getDestination());
+		System.out.println("El remitente es "+ ((Message) msg).getRemitent());
 		
-		for (int i = 0; i < ((Linkable) currentNode.getProtocol(0)).degree(); i++) {
-			System.out.println("NeighborNode: "
-					+ ((Linkable) currentNode.getProtocol(0)).getNeighbor(i).getID());
+		for(int i = 0; i < DHTElements;i++){
+			System.out.println("La mejor distancias es "+minDistance+" hacia el nodo "+bestNextNode.getID());
+			int tempDistance = moduleMinus(((SNode) currentNode).getDHT()[i],destination);
+			if(tempDistance<minDistance){				
+				bestNextNode = Network.get(((SNode) currentNode).getDHT()[i]);
+				minDistance = tempDistance;
+			}
 		}
 
 		/**
 		 * Envió del dato a través de la capa de transporte, la cual enviará
 		 * según el ID del emisor y el receptor
 		 */
-		((Transport) currentNode.getProtocol(transportId)).send(currentNode, sendNode, message, layerId);
+		((Transport) currentNode.getProtocol(transportId)).send(currentNode, bestNextNode, msg, layerId);
 		// Otra forma de hacerlo
 		// ((Transport)
 		// currentNode.getProtocol(FastConfig.getTransport(layerId))).send(currentNode,
 		// searchNode(sendNode), message, layerId);
 
 	}
+	
+	private int moduleMinus(int a, int b) {
+		int answer = a-b;
+		if(answer < 0){
+			answer = Network.size()+answer;
+		}
+		return answer;
+	}
 
+	
 	/**
 	 * Constructor por defecto de la capa Layer del protocolo construido
 	 * 
@@ -91,4 +110,5 @@ public class Layer implements Cloneable, EDProtocol {
 		Layer dolly = new Layer(Layer.prefix);
 		return dolly;
 	}
+	
 }

@@ -4,7 +4,6 @@ import peersim.config.Configuration;
 import peersim.core.CommonState;
 import peersim.core.Control;
 import peersim.core.Network;
-import peersim.core.Node;
 import peersim.edsim.EDSimulator;
 
 public class TrafficGenerator implements Control {
@@ -18,16 +17,16 @@ public class TrafficGenerator implements Control {
 
 	@Override
 	public boolean execute() {
-		// Distribución uniforme entre [0-1]
-		double uniformRandom = CommonState.r.nextDouble();
-
+		System.out.println("TRAFFIC GENERATOR");
 		// Considera cualquier nodo de manera aleatoria de la red
-		Node initNode = Network.get(CommonState.r.nextInt(Network.size()));
-
-		int sendNode = CommonState.r.nextInt(Network.size());
-
-		// Se crea un nuevo mensaje
-		Message message = new Message("Number random: " + uniformRandom, sendNode);
+		SNode initNode = (SNode) Network.get(CommonState.r.nextInt(Network.size()));
+	
+		//Par�metros para la creaci�n del mensaje	
+		int sendId = CommonState.r.nextInt(Network.size());
+		int query = CommonState.r.nextInt(initNode.getBD().length);
+		
+		//Creaci�n del mensaje
+		Message msg = new Message(sendId, query,(int) initNode.getID());
 
 		// Y se envía, para realizar la simulación
 		// Los parámetros corresponde a:
@@ -36,7 +35,8 @@ public class TrafficGenerator implements Control {
 		// Node arg2: Nodo por el cual inicia el envío del dato
 		// int arg3: Número de la capa del protocolo que creamos (en este caso
 		// de layerId)
-		EDSimulator.add(0, message, initNode, layerId);
+		System.out.println("Message destination: "+msg.getDestination()+ " Message Query"+msg.getQuery() + " Message remitent "+msg.getRemitent());
+		EDSimulator.add(0, msg, initNode, layerId);
 
 		return false;
 	}

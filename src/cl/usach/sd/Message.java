@@ -4,20 +4,14 @@ package cl.usach.sd;
  * Clase la cual vamos a utilizar para enviar datos de un Peer a otro
  */
 public class Message {
-	private String text;
 	private int destination;
-
-	public Message(String text, int destination) {
-		this.setText(text);
+	private int query;
+	private int remitent;
+	
+	public Message(int destination, int query, int remitent) {
 		this.setDestination(destination);
-	}
-
-	public String getText() {
-		return text;
-	}
-
-	public void setText(String text) {
-		this.text = text;
+		this.setQuery(query);
+		this.setRemitent(remitent);
 	}
 
 	public int getDestination() {
@@ -26,5 +20,21 @@ public class Message {
 
 	public void setDestination(int destination) {
 		this.destination = destination;
+	}
+
+	public int getQuery() {
+		return query;
+	}
+
+	public void setQuery(int query) {
+		this.query = query;
+	}
+
+	public int getRemitent() {
+		return remitent;
+	}
+
+	public void setRemitent(int remitent) {
+		this.remitent = remitent;
 	}
 }
