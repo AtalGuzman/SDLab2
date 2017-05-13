@@ -18,18 +18,10 @@ public class Initialization implements Control {
 
 	public Initialization(String prefix) {
 		this.prefix = prefix;
-		/**
-		 * Para obtener valores que deseamos como argumento del archivo de
-		 * configuraci√≥n, podemos colocar el prefijo de la inicializaci√≥n en
-		 * este caso "init.1statebuilder" y luego la variable de entrada
-		 */
-		// Configuration.getPid retornar al n√∫mero de la capa
-		// que corresponden esa parte del protocolo
+
 		this.idLayer = Configuration.getPid(prefix + ".protocol");
 		this.idTransport = Configuration.getPid(prefix + ".transport");
-		// Configuration.getInt retorna el n√∫mero del argumento
-		// que se encuentra en el archivo de configuraci√≥n.
-		// Tambi√©n hay Configuration.getBoolean, .getString, etc...
+
 		System.out.println("NET PARAMETERS");
 		this.d = Configuration.getInt(prefix + ".d");
 		this.c = Configuration.getInt(prefix + ".c");
@@ -39,37 +31,36 @@ public class Initialization implements Control {
 		System.out.println("\tCache Size: "+c);
 	}
 
-	/**
-	 * Ejecuci√≥n de la inicializaci√≥n en el momento de crear el overlay en el
-	 * sistema
+	/* MÈtodo para ejecutar la inicializaciÛn de los
+	 * nodos para la red
 	 */
 	@Override
 	public boolean execute() {
-		/**
-		 * Tira un n√∫mero random el cual corresponder√° a un Nodo de la red
-		 */
-
-		/**
-		 * Asignar un valor al atributo del peer (o nodo) de la red
-		 */
 		System.out.println("INICIALIZATION");
 		int size = Network.size();
 		
+		//Dado que los nodos no tienen vecinos inicialmente
+		//se agregan para asegurar que queden agregados 
+		//en una geometrÌa circular
 		for(int i = 0; i < size; i++){
 			SNode node = (SNode) Network.get(i);
 			long id = node.getID();
 			((Linkable) node.getProtocol(0)).addNeighbor(Network.get((int)(id+1)%size));
 		}
 		
+		//Se inicializan los datos de cada nodo: la dht, la cache 
+		//y la base de datos
 		for(int i = 0; i < size; i++){
 			SNode node = (SNode) Network.get(i);
 			node.setDHT(DHTInicialization(node,1+2*d));
 			node.setCache(CacheInicialization());
 			node.setBD(BDInicialization());
 		}	
-
+		
+		//Se pueblan todas las base de datos
 		BDPopulate();
 
+		//Se muestran por pantalla los datos de la red
 		for(int i = 0; i < size; i++){
 			SNode node = (SNode) Network.get(i);
 			System.out.println("Node "+ node.getID()+" Neighbour "+ Network.get((int)((Linkable) node.getProtocol(0)).getNeighbor(0).getID()).getID());
@@ -83,10 +74,13 @@ public class Initialization implements Control {
 			node.cacheShow();
 		}
 		
-		
 		return true;
 	}
 	
+	/* MÈtodo para poblar las bases de datos
+	 * de cada uno de los nodos, asegurando que los
+	 * datos no se van a repetir en cada nodo
+	 * */
 	private void BDPopulate(){
 		for(int i = 0; i < this.BDSize; i++){
 			SNode node = (SNode) Network.get(i%Network.size());
@@ -95,11 +89,17 @@ public class Initialization implements Control {
 		}
 	}
 	
+	/* MÈtodo para inicializar una base de datos
+	 * con el tamaÒo adecuado
+	 * */
 	private int[] BDInicialization(){
 		int[] arr = new int[this.d];
 		return arr;
 	}
 	
+	/* MÈtodo para inicializar la cachÈ
+	 * exclusivamente con -1
+	 * */
 	private int[][] CacheInicialization(){
 		int[][] cache =  new int[this.c][3];
 		
@@ -111,6 +111,12 @@ public class Initialization implements Control {
 		return cache;
 	}
 	
+	/* MÈtodo para inicializar la tablas hash de cada Nodo
+	 * Recibe como entrada:
+	 * 		Node: El nodo que ser· inicializado
+	 * 		DHTSize: El tamaÒo de la tabla que se debe crear
+	 * Retorna: Tabla DHT inicializada
+	 * */
 	private int[] DHTInicialization(SNode node, int DHTSize){
 		int[] _dht = new int[DHTSize];
 		int x = 1;

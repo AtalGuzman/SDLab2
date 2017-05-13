@@ -28,40 +28,60 @@ public class Layer implements Cloneable, EDProtocol {
 		Message msg = (Message) event;
 		System.out.println("Current_Node: "+myNode.getID() );
 		
+		//Si el nodo actual es el destino del mensaje
 		if(msg.getDestination() == myNode.getID()){
+		//Si no tiene ningún dato, quiere decir que debo responder una query
 			if(msg.getData() < 0){
-								
+		//Se crea la respuesta, pero el destino corresponde al nodo que 
+		//le envió el mensaje, para asegurar que se mande por el mismo camino
+		//pero en sentido contrario
 				Message answer = new Message(msg.getPath().pop(),msg.getQuery(),msg.getDestination());
 				
+		//Se agregan los datos correspondientes
 				answer.setData(((SNode) myNode).getBD()[msg.getQuery()]);
 				
+		//Se agrega el camino que debe enviar
 				answer.setPath(msg.getPath());
+				
+		//Se muestran los datos
 				System.out.println("\tQuery received [node_destination, data_id, data] = ["+msg.getDestination()+", "+msg.getQuery()+", ?]");
 				System.out.println("\tQuery answered [node_destination, data_id, data] = ["+answer.getDestination()+", "+answer.getQuery()+", "+answer.getData()+"]");
 
+		//Se envía el mensaje
 				sendmessage(myNode, layerId, (Object) answer);
-				
 			}
 			else{
+		//Se verifica si el camino está vacío
 				if(msg.getPath().isEmpty()){
+		//Si está vacío es porque recibí la respuesta solicitada, actualizo mi caché
 					System.out.println("\tQuery answered [node_destination, data_id, data] = ["+msg.getDestination()+", "+msg.getQuery()+", "+msg.getData()+"]");
 					((SNode) myNode).cacheUpdate(msg.getRemitent(), msg.getQuery(), msg.getData());
+		//Se muestra la caché			
 					System.out.println("\tCache update");
 					((SNode) myNode).cacheShow();
 				}
 				else{
+		//Si no, entonces soy parte del camino de regreso de la respuesta
+		//Se actualiza la caché
 					((SNode) myNode).cacheUpdate(msg.getRemitent(), msg.getQuery(), msg.getData());
+		//Se muestra por pantalla el cache actualizado
 					System.out.println("\tCache update");
 					((SNode)myNode).cacheShow();
+		//Se actualiza el siguiente destino
 					msg.setDestination(msg.getPath().pop());
 					System.out.println("\tQuery transmited [node_destination, data_id, data] = ["+msg.getDestination()+", "+msg.getQuery()+", "+msg.getData()+"]");
+		//Se envía el mensaje
 					sendmessage(myNode,layerId,msg);				
 				}
 			}
 		}
 		else{
+		//Si no soy el destino entonces se debe revisar si es mi solicitud yo o si llegó a un
+		//nodo intermediario
 			if(msg.getRemitent() != myNode.getID()){
+		//Si soy un nodo intermediario, debo revisar si tengo la consulta en caché
 				if( ((SNode) myNode).cacheReview(msg.getDestination(), msg.getQuery())){
+		//Si lo tengo en caché entonces debo responder la solicitud y enviar un mensaje de vuelta
 					System.out.println("\tCache hit");
 					int[] hit = ((SNode) myNode).cacheHit(msg.getDestination(), msg.getQuery());					
 					Message answer = new Message(msg.getPath().pop(),msg.getQuery(),msg.getDestination());
@@ -71,6 +91,7 @@ public class Layer implements Cloneable, EDProtocol {
 					sendmessage(myNode, layerId, (Object) answer);	
 				}
 				else{
+		//Si no lo tengo en caché entonces debo reenviar la solicitud al siguiente mejor nodo
 					System.out.println("\tCache miss");
 					System.out.println("\tQuery transmited [node_destination, data_id, data] = ["+msg.getDestination()+", "+msg.getQuery()+", ?]");
 					msg.getPath().push( (int) myNode.getID());
@@ -78,13 +99,16 @@ public class Layer implements Cloneable, EDProtocol {
 				}
 			}
 			else{
+		//Si soy el que mandó la solicitud, debo ver si lo tengo en caché
 				if( ((SNode) myNode).cacheReview(msg.getDestination(), msg.getQuery())){
+		//Si lo tengo en caché, la solicitud es respondida inmediatamente y no se envía el mensaje
 					System.out.println("\tCache hit");
 					int[] hit = new int[3];
 					hit = ((SNode) myNode).cacheHit(msg.getDestination(), msg.getQuery());
 					System.out.println("\tQuery answered [node_destination, data_id, data] = ["+hit[0]+", "+hit[1]+", "+hit[2]+"]");
 				}
 				else{
+		//De lo contrario hubo un miss en el caché y por tanto se debe enviar el mensaje
 					System.out.println("\tCache miss");
 					System.out.println("\tQuery generated [node_destination, data_id, data] = ["+msg.getDestination()+", "+msg.getQuery()+", ?]");
 					sendmessage(myNode,layerId,msg);
@@ -98,35 +122,58 @@ public class Layer implements Cloneable, EDProtocol {
 		Observer.message.add(1);
 	}
 
+	/* Método para enviar un mensaje asegurando que siempre se enviará el mejor nodo 
+	 * según el algoritmo del enunciado o será envíado siguiendo el camino inverso
+	 * Recibe como entrada:
+	 * 		current node: el nodo actual
+	 * 		layerId: el id del layer por donde se envía el mensaje
+	 * 		msg: mensaje que será enviado
+	 * */
 	public void sendmessage(Node currentNode, int layerId, Object msg) {
 		Node bestNextNode;
+		//Se verifica si el mensaje es una solicitud o una respuesta
 		if( ((Message) msg).getData() < 0){
+		//Si es una solicitud
+		//Se asume que el mejor nodo es el vecino
 			bestNextNode = ((Linkable) currentNode.getProtocol(0)).getNeighbor(0);
+		//Se obtiene el destino
 			int destination = ((Message) msg).getDestination();
+		//Se obtiene la distancia entre el destino y el mejor nodo actual
 			int minDistance = moduleMinus(destination, (int) bestNextNode.getID());
 			
 			int DHTElements = 0;
+		//Se calculan los elementos validos en la DHT
 			while(((SNode) currentNode).getDHT()[DHTElements]>0) DHTElements++;
-			
+		
+		//Se deben verificar si existen mejor distancias con los elementos de la DHT
 			for(int i = 0; i < DHTElements;i++){
 				int tempDistance = moduleMinus(destination,((SNode) currentNode).getDHT()[i]);
-				if(tempDistance<minDistance){				
+				if(tempDistance<minDistance){		
+		//Si la distancia con el nodo actual es mejor que la distancia mínima
+		//Se actualiza el mejor nodo y se actualiza la distancia mínima
 					bestNextNode = Network.get(((SNode) currentNode).getDHT()[i]);
 					minDistance = tempDistance;
 				}
 			}
-			
 		}
 		else{
+		//Si es una respuesta, entonces solo se debe enviar al nodo que está
+		//específicado en el mensaje, ya que se asegura que es el del camino inverso
 			bestNextNode =  Network.get(((Message) msg).getDestination());
-			//System.out.println(bestNextNode);
-			//System.out.println("*");
 		}
+		//El mensaje es enviado
 		((Transport) currentNode.getProtocol(transportId)).send(currentNode, bestNextNode, msg, layerId);
-		//System.out.println("*");
 		return;
 	}
 	
+	/* Método para obtener la distancia de dos elementos
+	 * sobre una circunferencia y que además solo 
+	 * se puede mover en la dirección de las agujas del reloj
+	 * Recibe como entrada:
+	 * 		a: id de un nodo
+	 * 		b: id de otro nodo
+	 * Retorna: La distancia entre los nodos a partir de sus id
+	 * */
 	private int moduleMinus(int a, int b) {
 		int answer = a-b;
 		if(answer < 0){

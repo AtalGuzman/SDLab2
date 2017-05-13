@@ -4,8 +4,13 @@ import peersim.core.GeneralNode;
 import java.util.Stack;
 
 public class SNode extends GeneralNode {
+	//Tabla dht del nodo
 	private int[] DHT;
+	
+	//Caché del nodo
 	private int[][] Cache;
+	
+	//Base de datos
 	private int[] BD;
 	
 	public SNode(String prefix) {
@@ -30,6 +35,13 @@ public class SNode extends GeneralNode {
 		BD = bD;
 	}
 	
+	/* Método para revisar si un consulta está en caché o no
+	 * Recibe como entrada:
+	 * 		node: La id del nodo al que se le hace la consulta
+	 * 		dataId: La id del dato en la base de datos que se está haciendo
+	 * Retorna: un valor booleano si es verdadero, hubo un hit. Si es falso
+	 * 		hubo un miss
+	 */
 	public boolean cacheReview(int node, int dataId){
 		boolean answer = false;
 		for(int i = 0; i< this.Cache.length; i++){
@@ -40,6 +52,12 @@ public class SNode extends GeneralNode {
 		return answer;
 	}
 	
+	/* Método para retornar los valor en la caché
+	 * Recibo como entrada:
+	 * 		node: La id del nodo al que se le hace la consulta
+	 * 		dataId: La id del dato en la base de datos que se está haciendo
+	 * Retorna: el dato en caché que hizo el hit
+	 * */
 	public int[] cacheHit(int node, int dataId){
 		int [] answer = new int[3];
 		for(int i = 0; i< this.Cache.length; i++){
@@ -52,31 +70,38 @@ public class SNode extends GeneralNode {
 		return answer;
 	}
 
+	/* Método para actualizar la caché cuando el mensaje realiza
+	 * el camino inverso como una respuesta.
+	 * En caso de que el caché esté lleno se hace una política FIFO
+	 * Recibe como entrada:
+	 * 		nodeId: id del nodo que tenía originalmente el dato
+	 * 		query: id del dato en la base de datos del nodo que lo posee
+	 * 		data: información guardada en la base de datos
+	 * */
 	public void cacheUpdate(int nodeId,int query,int data){
 		if(this.Cache[this.Cache.length-1][0] != -1){
 			System.out.println("FULL CACHE");
-			//System.out.print("El caché está lleno");
-			//Está lleno, se elimina el elemento más antiguo
 			int i = 0;
 			for(i = 0; i< this.Cache.length-1;i++){
 				this.Cache[i][0] = this.Cache[i+1][0];
 				this.Cache[i][1] = this.Cache[i+1][1];
-				this.Cache[i][2] = this.Cache[i+1][2]; //Todo se corre un espació
+				this.Cache[i][2] = this.Cache[i+1][2]; 
 			}
 			this.Cache[i][0] = nodeId;
 			this.Cache[i][1] = query;
 			this.Cache[i][2] = data;		
 		}
 		else{
-			//System.out.println("El caché no está lleno");
 			int index = 0;
-			while(this.Cache[index][0]>=0) index++; //Mientras una posición de lcaché esté ocupado, se corre una posición
+			while(this.Cache[index][0]>=0) index++; 
 			this.Cache[index][0] = nodeId;
 			this.Cache[index][1] = query;
 			this.Cache[index][2] = data;			
 		}
 	}
 	
+	/* Método para mostrar el contenido de la caché del nodo
+	 * */
 	public void cacheShow(){
 		if(this.Cache[0][0] != -1){
 			System.out.println("\t\tNODE\tDATA_ID\tDATA");

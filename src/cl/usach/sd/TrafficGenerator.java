@@ -30,13 +30,7 @@ public class TrafficGenerator implements Control {
 		//Creaci�n del mensaje
 		Message msg = new Message(sendId, query,(int) initNode.getID());
 
-		// Y se envía, para realizar la simulación
-		// Los parámetros corresponde a:
-		// long arg0: Delay del evento
-		// Object arg1: Evento enviado
-		// Node arg2: Nodo por el cual inicia el envío del dato
-		// int arg3: Número de la capa del protocolo que creamos (en este caso
-		// de layerId)
+		//Se agrega al camino del mensaje la id del nodo precursor
 		msg.getPath().push( (int) initNode.getID());
 		EDSimulator.add(0, msg, initNode, layerId);
 
