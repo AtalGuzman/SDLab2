@@ -80,7 +80,9 @@ public class SNode extends GeneralNode {
 	 * */
 	public void cacheUpdate(int nodeId,int query,int data){
 		if(this.Cache[this.Cache.length-1][0] != -1){
-			System.out.println("FULL CACHE");
+			System.out.println("\tFULL CACHE-FIFO");
+			System.out.println("\tCache deprecated");
+			this.cacheShow();
 			int i = 0;
 			for(i = 0; i< this.Cache.length-1;i++){
 				this.Cache[i][0] = this.Cache[i+1][0];
@@ -108,6 +110,9 @@ public class SNode extends GeneralNode {
 			for(int i  = 0; i < this.Cache.length;i++){
 				if(this.Cache[i][0] >=0) System.out.println("\t\t"+this.Cache[i][0]+"\t"+this.Cache[i][1]+"\t"+this.Cache[i][2]);
 			}
+		} else{
+			System.out.println("\t\tEmpty Caché");
+			System.out.println("\t\t--");
 		}
 	}
 }

@@ -18,7 +18,7 @@ public class TrafficGenerator implements Control {
 
 	@Override
 	public boolean execute() {
-		System.out.println("TRAFFIC GENERATOR");
+		System.out.println("TRAFFIC GENERATOR [time = "+CommonState.getTime()+"]");
 		// Considera cualquier nodo de manera aleatoria de la red
 		SNode initNode = (SNode) Network.get(CommonState.r.nextInt(Network.size()));
 	
@@ -26,7 +26,7 @@ public class TrafficGenerator implements Control {
 		int sendId = CommonState.r.nextInt(Network.size());
 		while(sendId == initNode.getID()) sendId = CommonState.r.nextInt(Network.size());
 		int query = CommonState.r.nextInt(initNode.getBD().length);
-		
+		System.out.println("\t\nGENERATOR NODE: "+initNode.getID()+"\n");
 		//Creación del mensaje
 		Message msg = new Message(sendId, query,(int) initNode.getID());
 

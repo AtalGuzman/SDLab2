@@ -25,6 +25,7 @@ public class Layer implements Cloneable, EDProtocol {
 	 */
 	@Override
 	public void processEvent(Node myNode, int layerId, Object event) {
+		System.out.println("LAYER [time ="+CommonState.getTime()+"]");
 		Message msg = (Message) event;
 		System.out.println("Current_Node: "+myNode.getID() );
 		
@@ -44,8 +45,8 @@ public class Layer implements Cloneable, EDProtocol {
 				answer.setPath(msg.getPath());
 				
 		//Se muestran los datos
-				System.out.println("\tQuery received [node_destination, data_id, data] = ["+msg.getDestination()+", "+msg.getQuery()+", ?]");
-				System.out.println("\tQuery answered [node_destination, data_id, data] = ["+answer.getDestination()+", "+answer.getQuery()+", "+answer.getData()+"]");
+				System.out.println("\tQuery received\n\t[node_destination,\tdata_id,\tdata]\n\t["+msg.getDestination()+",\t"+msg.getQuery()+",\t?]");
+				System.out.println("\tAnswer \n\t[node_destination,\tdata_id,\tdata]\n\t["+answer.getDestination()+",\t"+answer.getQuery()+",\t"+answer.getData()+"]");
 
 		//Se envía el mensaje
 				sendmessage(myNode, layerId, (Object) answer);
@@ -54,7 +55,7 @@ public class Layer implements Cloneable, EDProtocol {
 		//Se verifica si el camino está vacío
 				if(msg.getPath().isEmpty()){
 		//Si está vacío es porque recibí la respuesta solicitada, actualizo mi caché
-					System.out.println("\tQuery answered [node_destination, data_id, data] = ["+msg.getDestination()+", "+msg.getQuery()+", "+msg.getData()+"]");
+					System.out.println("\tQuery answered\n\t[node_destination,\tdata_id,\tdata]\n\t["+msg.getDestination()+",\t"+msg.getQuery()+",\t"+msg.getData()+"]");
 					((SNode) myNode).cacheUpdate(msg.getRemitent(), msg.getQuery(), msg.getData());
 		//Se muestra la caché			
 					System.out.println("\tCache update");
@@ -69,7 +70,7 @@ public class Layer implements Cloneable, EDProtocol {
 					((SNode)myNode).cacheShow();
 		//Se actualiza el siguiente destino
 					msg.setDestination(msg.getPath().pop());
-					System.out.println("\tQuery transmited [node_destination, data_id, data] = ["+msg.getDestination()+", "+msg.getQuery()+", "+msg.getData()+"]");
+					System.out.println("\tAnswer transmited\n\t[node_destination,\tdata_id,\tdata]\n\t["+msg.getDestination()+",\t"+msg.getQuery()+",\t"+msg.getData()+"]");
 		//Se envía el mensaje
 					sendmessage(myNode,layerId,msg);				
 				}
@@ -87,13 +88,13 @@ public class Layer implements Cloneable, EDProtocol {
 					Message answer = new Message(msg.getPath().pop(),msg.getQuery(),msg.getDestination());
 					answer.setData(hit[2]);
 					answer.setPath(msg.getPath());
-					System.out.println("\tQuery answered [node_destination, data_id, data] = ["+answer.getDestination()+", "+answer.getQuery()+", "+answer.getData()+"]");
+					System.out.println("\tQuery answered \n\t[node_destination,\tdata_id,\tdata]\n\t["+answer.getDestination()+",\t"+answer.getQuery()+",\t"+answer.getData()+"]");
 					sendmessage(myNode, layerId, (Object) answer);	
 				}
 				else{
 		//Si no lo tengo en caché entonces debo reenviar la solicitud al siguiente mejor nodo
 					System.out.println("\tCache miss");
-					System.out.println("\tQuery transmited [node_destination, data_id, data] = ["+msg.getDestination()+", "+msg.getQuery()+", ?]");
+					System.out.println("\tQuery transmited \n\t[node_destination,\tdata_id,\tdata]\n\t["+msg.getDestination()+",\t"+msg.getQuery()+",\t?]");
 					msg.getPath().push( (int) myNode.getID());
 					sendmessage(myNode,layerId,msg);
 				}
@@ -105,12 +106,12 @@ public class Layer implements Cloneable, EDProtocol {
 					System.out.println("\tCache hit");
 					int[] hit = new int[3];
 					hit = ((SNode) myNode).cacheHit(msg.getDestination(), msg.getQuery());
-					System.out.println("\tQuery answered [node_destination, data_id, data] = ["+hit[0]+", "+hit[1]+", "+hit[2]+"]");
+					System.out.println("\tQuery answered \n\t[node_destination,\tdata_id,\tdata]\n\t["+hit[0]+",\t"+hit[1]+",\t"+hit[2]+"]");
 				}
 				else{
 		//De lo contrario hubo un miss en el caché y por tanto se debe enviar el mensaje
 					System.out.println("\tCache miss");
-					System.out.println("\tQuery generated [node_destination, data_id, data] = ["+msg.getDestination()+", "+msg.getQuery()+", ?]");
+					System.out.println("\tQuery generated \n\t[node_destination,\tdata_id,\tdata]\n\t["+msg.getDestination()+",\t"+msg.getQuery()+",\t?]");
 					sendmessage(myNode,layerId,msg);
 				}
 			}
@@ -155,6 +156,8 @@ public class Layer implements Cloneable, EDProtocol {
 					minDistance = tempDistance;
 				}
 			}
+			System.out.println("\t\tBest next node: "+ bestNextNode.getID());
+			System.out.println("\t\tNext Nodes's distance to destiny: "+ minDistance);
 		}
 		else{
 		//Si es una respuesta, entonces solo se debe enviar al nodo que está

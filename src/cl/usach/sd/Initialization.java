@@ -12,8 +12,9 @@ public class Initialization implements Control {
 
 	int idLayer;
 	int idTransport;
-	int d;
+	int b;
 	int c;
+	int d;
 	int BDSize;
 
 	public Initialization(String prefix) {
@@ -22,13 +23,19 @@ public class Initialization implements Control {
 		this.idLayer = Configuration.getPid(prefix + ".protocol");
 		this.idTransport = Configuration.getPid(prefix + ".transport");
 
-		System.out.println("NET PARAMETERS");
-		this.d = Configuration.getInt(prefix + ".d");
+		System.err.println("NET PARAMETERS");
+		//Se obtiene el parámetro de tamaño de base de datos
+		this.b = Configuration.getInt(prefix + ".b");
+		//Se obtiene el parámetro de tamaño de caché
 		this.c = Configuration.getInt(prefix + ".c");
-		this.BDSize = d*Network.size();
-		System.out.println("\tNetwork size: "+Network.size());
-		System.out.println("\tDB Size: "+d);
-		System.out.println("\tCache Size: "+c);
+		this.d = Configuration.getInt(prefix+".d");
+		
+		this.BDSize = b*Network.size();
+		System.err.println("\tNetwork size: "+Network.size());
+		System.err.println("\tDB Size: "+b);
+		System.err.println("\tCache Size: "+c);
+		System.err.println("\tD parameter: "+d);
+		System.err.println("\tCACHE FIFO");
 	}
 
 	/* Método para ejecutar la inicialización de los
@@ -36,8 +43,26 @@ public class Initialization implements Control {
 	 */
 	@Override
 	public boolean execute() {
-		System.out.println("INICIALIZATION");
+		System.err.println("\nINICIALIZATION");
 		int size = Network.size();
+		int DHTSize = 1+2*d;
+		int x = 1;
+		
+		System.err.println("\n\tDHT Size: "+DHTSize);
+		System.err.print("\tx values: ");
+		
+		while(Math.pow(2,x)<size){
+			System.err.print(x+" ");
+			x++;
+		}
+		System.err.println(" [2^x < n]");
+		System.err.print("\tDistances: ");
+		x = 1;
+		while(Math.pow(2,x)<size){
+			System.err.print(new Double(Network.size()/Math.pow(2,x)).intValue()+" ");
+			x++;
+		}
+		System.err.println(" [n/2^x]\n");
 		
 		//Dado que los nodos no tienen vecinos inicialmente
 		//se agregan para asegurar que queden agregados 
@@ -48,20 +73,23 @@ public class Initialization implements Control {
 			((Linkable) node.getProtocol(0)).addNeighbor(Network.get((int)(id+1)%size));
 		}
 		
-		//Se inicializan los datos de cada nodo: la dht, la cache 
+		//Se inicializan los datos de cada nodo: la dht, la cache vacía
 		//y la base de datos
+		
+		
 		for(int i = 0; i < size; i++){
 			SNode node = (SNode) Network.get(i);
-			node.setDHT(DHTInicialization(node,1+2*d));
+			node.setDHT(DHTInicialization(node,DHTSize));
 			node.setCache(CacheInicialization());
 			node.setBD(BDInicialization());
 		}	
+		
 		
 		//Se pueblan todas las base de datos
 		BDPopulate();
 
 		//Se muestran por pantalla los datos de la red
-		for(int i = 0; i < size; i++){
+		/*for(int i = 0; i < size; i++){
 			SNode node = (SNode) Network.get(i);
 			System.out.println("Node "+ node.getID()+" Neighbour "+ Network.get((int)((Linkable) node.getProtocol(0)).getNeighbor(0).getID()).getID());
 			System.out.println("\tDHT");
@@ -72,8 +100,7 @@ public class Initialization implements Control {
 				if(node.getDHT()[j] >= 0) System.out.println("\t\tBD: "+node.getBD()[j]);
 			}
 			node.cacheShow();
-		}
-		
+		}*/
 		return true;
 	}
 	
@@ -93,7 +120,7 @@ public class Initialization implements Control {
 	 * con el tamaño adecuado
 	 * */
 	private int[] BDInicialization(){
-		int[] arr = new int[this.d];
+		int[] arr = new int[this.b];
 		return arr;
 	}
 	
@@ -120,11 +147,11 @@ public class Initialization implements Control {
 	private int[] DHTInicialization(SNode node, int DHTSize){
 		int[] _dht = new int[DHTSize];
 		int x = 1;
-		
+
 		for(int i = 0; i < DHTSize; i++){
 			_dht[i] = -1;
 		}
-		while(Math.pow(2,x)<=Network.size()){
+		while(Math.pow(2,x)< Network.size()){
 			int dis = new Double(Network.size()/Math.pow(2,x)).intValue();
 			_dht[x-1] = ((int)node.getID()+dis)%Network.size(); 
 			x++;
