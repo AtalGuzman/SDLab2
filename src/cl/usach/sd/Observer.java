@@ -28,7 +28,7 @@ public class Observer implements Control {
 		int d = nodeSample.getDHT().length%4;
 		int c = nodeSample.getCache().length%4;
 		int k = 1;
-		String s1 = "";
+		String s1 = "\t";
 		String s2 = "";
 		String s3 = "";
 		while(k<d){
@@ -53,11 +53,12 @@ public class Observer implements Control {
 			for(int j = 0; j < node.getDHT().length;j++){
 				if(node.getDHT()[j] > -1) System.err.print(node.getDHT()[j]+" ");
 			}
-			System.err.print(s1);
+			System.err.print(" |");
 			for(int j = 0; j < node.getBD().length;j++){
 				System.err.print(node.getBD()[j]+" ");
 			}
-			System.err.print(s2);
+			System.err.print("|\t");
+
 			for(int j = 0; j < node.getCache().length;j++){
 				if(node.getCache()[j][0] > -1) System.err.print("[NODE: "+node.getCache()[j][0]+" DATA_ID: "+node.getCache()[j][1]+" DATA: "+node.getCache()[j][2]+"] ");
 				else System.err.print("[]");
