@@ -79,7 +79,7 @@ public class Initialization implements Control {
 		
 		for(int i = 0; i < size; i++){
 			SNode node = (SNode) Network.get(i);
-			node.setDHT(DHTInicialization(node,DHTSize));
+			node.setDHT(DHTInicialization(node,DHTSize,this.d));
 			node.setCache(CacheInicialization());
 			node.setBD(BDInicialization());
 		}	
@@ -144,16 +144,29 @@ public class Initialization implements Control {
 	 * 		DHTSize: El tamaño de la tabla que se debe crear
 	 * Retorna: Tabla DHT inicializada
 	 * */
-	private int[] DHTInicialization(SNode node, int DHTSize){
+	private int[] DHTInicialization(SNode node, int DHTSize, int D){
 		int[] _dht = new int[DHTSize];
 		int x = 1;
-
 		for(int i = 0; i < DHTSize; i++){
 			_dht[i] = -1;
 		}
-		while(Math.pow(2,x)< Network.size()){
+		
+		int j = 0;
+		
+		System.out.println("*");
+		while(x <= D && Math.pow(2,x)< Network.size()){
 			int dis = new Double(Network.size()/Math.pow(2,x)).intValue();
-			_dht[x-1] = ((int)node.getID()+dis)%Network.size(); 
+			_dht[j] = ((int)node.getID()+dis)%Network.size(); 
+
+			int dis2 =  Network.size() - new Double(Network.size()/Math.pow(2,x)).intValue();
+			System.out.println(dis+" "+dis2);
+			if(dis != dis2){
+				System.out.println("Se debe agregar otra cosa"+((int)node.getID()+dis2)%Network.size());
+				j++;
+				_dht[j] = ((int)node.getID()+dis2)%Network.size(); 
+			}
+			
+			j++;
 			x++;
 		}
 		return _dht;
