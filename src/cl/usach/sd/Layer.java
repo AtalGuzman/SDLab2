@@ -144,10 +144,8 @@ public class Layer implements Cloneable, EDProtocol {
 			
 			int DHTElements = 0;
 		//Se calculan los elementos validos en la DHT
-			while(DHTElements<((SNode) currentNode).getDHT().length && ((SNode) currentNode).getDHT()[DHTElements]>0){
-				System.out.println("*");
-				DHTElements++;
-			} 
+			while(DHTElements<((SNode) currentNode).getDHT().length && ((SNode) currentNode).getDHT()[DHTElements]>0) DHTElements++;
+			
 			
 		
 		//Se deben verificar si existen mejor distancias con los elementos de la DHT

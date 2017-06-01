@@ -153,15 +153,12 @@ public class Initialization implements Control {
 		
 		int j = 0;
 		
-		System.out.println("*");
-		while(x <= D && Math.pow(2,x)< Network.size()){
+		while(Math.pow(2,x)< Network.size() && j < _dht.length){
 			int dis = new Double(Network.size()/Math.pow(2,x)).intValue();
 			_dht[j] = ((int)node.getID()+dis)%Network.size(); 
 
 			int dis2 =  Network.size() - new Double(Network.size()/Math.pow(2,x)).intValue();
-			System.out.println(dis+" "+dis2);
 			if(dis != dis2){
-				System.out.println("Se debe agregar otra cosa"+((int)node.getID()+dis2)%Network.size());
 				j++;
 				_dht[j] = ((int)node.getID()+dis2)%Network.size(); 
 			}
