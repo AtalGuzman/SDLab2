@@ -92,11 +92,20 @@ public class Initialization implements Control {
 		for(int i = 0; i < size; i++){
 			SNode3 node = (SNode3) Network.get(i);
 			this.DHTInicialization(node);
+		}
+		
+		//Se inicializa la sub red
+		for(int i = 0; i < size; i++){
+			SNode3 node = (SNode3) Network.get(i);
+			this.generateSubRed(node);
+			
+		}
+		for(int i = 0; i < size; i++){
+			SNode3 node = (SNode3) Network.get(i);
 			System.out.println("\nNode "+ node.getID());
 			System.out.println("\tHash:"+ node.getHash());
 			System.out.println("\tNeighbour Super-peer ID: "+ Network.get((int)((Linkable) node.getProtocol(0)).getNeighbor(0).getID()).getID());
 			System.out.println("\tSub-Net Nodes:");
-			this.generateSubRed(node);
 			node.showSubRed();
 			node.showDht();
 			node.cacheShow();
@@ -191,22 +200,38 @@ public class Initialization implements Control {
 		int NetSize = CommonState.r.nextInt(m+1-n)+n;
 		int cant_nodos = 0;
 		
-		//System.out.println("El tamaño de la red es "+NetSize);
+		System.out.println("El tamaño de la red es "+NetSize);
 
 		SNode3 node2 = (SNode3) node.clone();
 		node2.setCache(null);
 		node2.setDHT(null);
 		node2.setPort(-1);
 		node2.setSuper_peer(0);
-		//System.out.println("La id del nodo creado es "+node2.getID());
-		//System.out.println("El hash del nodo creado es "+node2.getHash());
+		Network.add(node2);
 		((Linkable) node.getProtocol(0)).addNeighbor(node2);
-		
+		int idPrimerNode = (int) node2.getID();
+		int idVecino = 0;
+		int agregado = 0;
+		node.setSubNet(new int[NetSize]);
+		node.getSubNet()[cant_nodos] = (int) node2.getID();
 		cant_nodos++;
-		
+
 		while(cant_nodos < NetSize){
 			SNode3 node3 = (SNode3) node2.clone();
-			((Linkable) node.getProtocol(0)).addNeighbor(node3);
+			int idNodeActual = (int) node3.getID();
+			agregado = CommonState.r.nextInt(100);
+			Network.add(node3);
+			node.getSubNet()[cant_nodos] = (int) node3.getID();
+			//System.out.println("La id del nodo creado es "+node3.getID());
+			if(agregado >40){
+				System.out.println("vecino directo");
+				((Linkable) node.getProtocol(0)).addNeighbor(node3);
+			} else{
+				System.out.println("Vecino indirecto");
+				idVecino = CommonState.r.nextInt(idNodeActual-idPrimerNode)+idPrimerNode;
+				//System.out.println("Se agregará como vecino al nodo "+idVecino);
+				((Linkable) Network.get(idVecino).getProtocol(0)).addNeighbor(node3);
+			}
 			cant_nodos++;
 		}
 	}

@@ -22,6 +22,8 @@ public class SNode3 extends GeneralNode {
 	
 	private String hash;
 	
+	private int[] subNet;
+	
 	public SNode3(String prefix) {
 		super(prefix);
 	}
@@ -143,9 +145,8 @@ public class SNode3 extends GeneralNode {
 		}
 	}
 	public void showSubRed(){
-		int degree = ((Linkable)this.getProtocol(0)).degree();
-		for(int j = 1; j < degree; j++  ){
-			System.out.println("\t\tID: "+(int)((Linkable) this.getProtocol(0)).getNeighbor(j).getID());
+		for(int j = 0; j < this.getSubNet().length; j++){
+			System.out.println("\t\tID: "+this.getSubNet()[j]);		
 		}
 		return;
 	}
@@ -154,5 +155,11 @@ public class SNode3 extends GeneralNode {
 	}
 	public void setSuper_peer(int super_peer) {
 		this.super_peer = super_peer;
+	}
+	public int[] getSubNet() {
+		return subNet;
+	}
+	public void setSubNet(int[] subNet) {
+		this.subNet = subNet;
 	}
 }
