@@ -39,7 +39,7 @@ public class Layer implements Cloneable, EDProtocol {
 				Message answer = new Message(msg.getPath().pop(),msg.getQuery(),msg.getDestination());
 				
 		//Se agregan los datos correspondientes
-				answer.setData(((SNode) myNode).getBD()[msg.getQuery()]);
+				answer.setData(((SNode3) myNode).getBD()[msg.getQuery()]);
 				
 		//Se agrega el camino que debe enviar
 				answer.setPath(msg.getPath());
@@ -56,18 +56,18 @@ public class Layer implements Cloneable, EDProtocol {
 				if(msg.getPath().isEmpty()){
 		//Si está vacío es porque recibí la respuesta solicitada, actualizo mi caché
 					System.out.println("\tQuery answered\n\t[node_destination,\tdata_id,\tdata]\n\t["+msg.getDestination()+",\t"+msg.getQuery()+",\t"+msg.getData()+"]");
-					((SNode) myNode).cacheUpdate(msg.getRemitent(), msg.getQuery(), msg.getData());
+					((SNode3) myNode).cacheUpdate(msg.getRemitent(), msg.getQuery(), msg.getData());
 		//Se muestra la caché			
 					System.out.println("\tCache update");
-					((SNode) myNode).cacheShow();
+					((SNode3) myNode).cacheShow();
 				}
 				else{
 		//Si no, entonces soy parte del camino de regreso de la respuesta
 		//Se actualiza la caché
-					((SNode) myNode).cacheUpdate(msg.getRemitent(), msg.getQuery(), msg.getData());
+					((SNode3) myNode).cacheUpdate(msg.getRemitent(), msg.getQuery(), msg.getData());
 		//Se muestra por pantalla el cache actualizado
 					System.out.println("\tCache update");
-					((SNode)myNode).cacheShow();
+					((SNode3)myNode).cacheShow();
 		//Se actualiza el siguiente destino
 					msg.setDestination(msg.getPath().pop());
 					System.out.println("\tAnswer transmited\n\t[node_destination,\tdata_id,\tdata]\n\t["+msg.getDestination()+",\t"+msg.getQuery()+",\t"+msg.getData()+"]");
@@ -81,10 +81,10 @@ public class Layer implements Cloneable, EDProtocol {
 		//nodo intermediario
 			if(msg.getRemitent() != myNode.getID()){
 		//Si soy un nodo intermediario, debo revisar si tengo la consulta en caché
-				if( ((SNode) myNode).cacheReview(msg.getDestination(), msg.getQuery())){
+				if( ((SNode3) myNode).cacheReview(msg.getDestination(), msg.getQuery())){
 		//Si lo tengo en caché entonces debo responder la solicitud y enviar un mensaje de vuelta
 					System.out.println("\tCache hit");
-					int[] hit = ((SNode) myNode).cacheHit(msg.getDestination(), msg.getQuery());					
+					int[] hit = ((SNode3) myNode).cacheHit(msg.getDestination(), msg.getQuery());					
 					Message answer = new Message(msg.getPath().pop(),msg.getQuery(),msg.getDestination());
 					answer.setData(hit[2]);
 					answer.setPath(msg.getPath());
@@ -101,11 +101,11 @@ public class Layer implements Cloneable, EDProtocol {
 			}
 			else{
 		//Si soy el que mandó la solicitud, debo ver si lo tengo en caché
-				if( ((SNode) myNode).cacheReview(msg.getDestination(), msg.getQuery())){
+				if( ((SNode3) myNode).cacheReview(msg.getDestination(), msg.getQuery())){
 		//Si lo tengo en caché, la solicitud es respondida inmediatamente y no se envía el mensaje
 					System.out.println("\tCache hit");
 					int[] hit = new int[3];
-					hit = ((SNode) myNode).cacheHit(msg.getDestination(), msg.getQuery());
+					hit = ((SNode3) myNode).cacheHit(msg.getDestination(), msg.getQuery());
 					System.out.println("\tQuery answered \n\t[node_destination,\tdata_id,\tdata]\n\t["+hit[0]+",\t"+hit[1]+",\t"+hit[2]+"]");
 				}
 				else{
@@ -144,17 +144,17 @@ public class Layer implements Cloneable, EDProtocol {
 			
 			int DHTElements = 0;
 		//Se calculan los elementos validos en la DHT
-			while(DHTElements<((SNode) currentNode).getDHT().length && ((SNode) currentNode).getDHT()[DHTElements]>0) DHTElements++;
+			while(DHTElements<((SNode3) currentNode).getDHT().length && ((SNode3) currentNode).getDHT()[DHTElements]>0) DHTElements++;
 			
 			
 		
 		//Se deben verificar si existen mejor distancias con los elementos de la DHT
 			for(int i = 0; i < DHTElements;i++){
-				int tempDistance = moduleMinus(destination,((SNode) currentNode).getDHT()[i]);
+				int tempDistance = moduleMinus(destination,((SNode3) currentNode).getDHT()[i]);
 				if(tempDistance<minDistance){		
 		//Si la distancia con el nodo actual es mejor que la distancia mínima
 		//Se actualiza el mejor nodo y se actualiza la distancia mínima
-					bestNextNode = Network.get(((SNode) currentNode).getDHT()[i]);
+					bestNextNode = Network.get(((SNode3) currentNode).getDHT()[i]);
 					minDistance = tempDistance;
 				}
 			}

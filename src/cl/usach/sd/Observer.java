@@ -23,7 +23,7 @@ public class Observer implements Control {
 	public boolean execute() {
 		int size = Network.size();
 		for (int i = 0; i < Network.size(); i++) {
-			SNode node = (SNode) Network.get(i);
+			SNode3 node = (SNode3) Network.get(i);
 			if (!node.isUp()) {
 				size--;
 			}

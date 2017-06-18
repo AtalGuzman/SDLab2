@@ -3,9 +3,9 @@ package cl.usach.sd;
 import peersim.core.GeneralNode;
 import java.util.Stack;
 
-public class SNode extends GeneralNode {
+public class SNode3 extends GeneralNode {
 	//Tabla dht del nodo
-	private int[] DHT;
+	private String[][] DHT;
 	
 	//Caché del nodo
 	private int[][] Cache;
@@ -13,13 +13,17 @@ public class SNode extends GeneralNode {
 	//Base de datos
 	private int[] BD;
 	
-	public SNode(String prefix) {
+	private int port;
+	
+	private String hash;
+	
+	public SNode3(String prefix) {
 		super(prefix);
 	}
-	public int[] getDHT() {
+	public String[][] getDHT() {
 		return DHT;
 	}
-	public void setDHT(int[] dHT) {
+	public void setDHT(String[][] dHT) {
 		DHT = dHT;
 	}
 	public int[][] getCache() {
@@ -111,8 +115,26 @@ public class SNode extends GeneralNode {
 				if(this.Cache[i][0] >=0) System.out.println("\t\t"+this.Cache[i][0]+"\t"+this.Cache[i][1]+"\t"+this.Cache[i][2]);
 			}
 		} else{
-			System.out.println("\t\tEmpty Caché");
+			System.out.println("\tEmpty Caché:");
 			System.out.println("\t\t--");
+		}
+	}
+	public String getHash() {
+		return hash;
+	}
+	public void setHash(String hash) {
+		this.hash = hash;
+	}
+	public int getPort() {
+		return port;
+	}
+	public void setPort(int port) {
+		this.port = port;
+	}
+	public void showDht(){
+		System.out.println("\tChord fingertable");
+		for(int i = 0; i< this.DHT.length;i++){
+			System.out.println("\t\tID: "+this.DHT[i][0]+" Hash: "+this.DHT[i][1]);
 		}
 	}
 }

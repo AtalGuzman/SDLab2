@@ -1,0 +1,7 @@
+Laboratorio 2 de Sistemas distribuidos
+Adolfo Guzmán Leiva 18850926-6
+
+En este laboratorio se simula una red p2p estructurada en anillo, donde 
+cada nodo posee una base de datos, una cache y una dht.
+El cache en esta oportunidad utilizada una política de eliminación de datos FIFO.
+Los parámetros utilizados son los mismos especíicados en el enunciado del laboratorio.
