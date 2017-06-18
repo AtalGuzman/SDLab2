@@ -102,10 +102,9 @@ public class Initialization implements Control {
 		}
 		for(int i = 0; i < size; i++){
 			SNode3 node = (SNode3) Network.get(i);
-			System.out.println("\nSuper-peer\tIP: "+ node.getID());
-			System.out.println("\tSuper-peer port: "+node.getPort());
-			System.out.println("\tHash:"+ node.getHash());
-			System.out.println("\tNeighbour Super-peer ID: "+ Network.get((int)((Linkable) node.getProtocol(0)).getNeighbor(0).getID()).getID());
+			System.out.println("\nSP ID: "+node.getID()+"\tIP: "+ node.getID()+"\tPort: "+node.getPort());
+			System.out.println("\tHash: "+ node.getHash());
+			System.out.println("\tNeighbour SP ID: "+ (int)((Linkable) node.getProtocol(0)).getNeighbor(0).getID());
 			System.out.println("\tSub-Net Nodes:");
 			node.showSubRed();
 			node.showDht();
@@ -201,7 +200,7 @@ public class Initialization implements Control {
 		int NetSize = CommonState.r.nextInt(m+1-n)+n;
 		int cant_nodos = 0;
 		
-		System.out.println("El tamaño de la red es "+NetSize);
+		//System.out.println("El tamaño de la red es "+NetSize);
 
 		SNode3 node2 = (SNode3) node.clone();
 		node2.setCache(null);

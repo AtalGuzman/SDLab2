@@ -22,19 +22,19 @@ public class Observer implements Control {
 	@Override
 	public boolean execute() {
 		int size = Network.size();
+		System.err.println("Información sobre los Super-peer");
 		for (int i = 0; i < Network.size(); i++) {
 			SNode3 node = (SNode3) Network.get(i);
 			if (!node.isUp()) {
 				size--;
 			}
+			if(node.getSuper_peer() == 1){
+				System.err.print("Super-peer ");
 			System.err.print("ID: "+node.getID()+"\t Vecino: "+ ((Linkable) node.getProtocol(0)).getNeighbor(0).getID()+"\t");
 			System.err.print("DHT: ");
+			
 			for(int j = 0; j < node.getDHT().length;j++){
-				if(node.getDHT()[j] > -1) System.err.print(node.getDHT()[j]+" ");
-			}
-			System.err.print("\tBD: ");
-			for(int j = 0; j < node.getBD().length;j++){
-				System.err.print(node.getBD()[j]+" ");
+				System.err.print(node.getDHT()[j][1].substring(0,1)+" ");
 			}
 			System.err.print("\tCache: ");
 
@@ -43,13 +43,38 @@ public class Observer implements Control {
 				else System.err.print("[]");
 			}
 			
+			System.err.print("\tSub-Net: ");
+			for(int j = 0; j < node.getSubNet().length;j++){
+				System.err.print(node.getSubNet()[j]+" ");
+			}
+			
 			System.err.println();
+			}
 			
 		}
-
+		
+		System.err.println("Información sobre sub red");
+		
+		for (int i = 0; i < Network.size(); i++) {
+			SNode3 node = (SNode3) Network.get(i);
+			if(node.getSuper_peer()==1){
+				System.err.print("SUB-RED "+node.getID());
+				System.err.print("("+node.getSubNet().length+" peers + 1 Super-peer)");
+				for(int j = 0; j < node.getSubNet().length;j++){
+					System.err.println();
+					SNode3 node2 = (SNode3) Network.get(node.getSubNet()[j]);
+					System.err.print("\tIP: "+node2.getID());
+					System.err.print("Neighbours: ");
+					int degree = ((Linkable) node2.getProtocol(0)).degree();
+					for(int k = 0; k < degree;k++){
+						System.err.print(((Linkable) node2.getProtocol(0)).getNeighbor(k).getID()+" ");
+					}
+				}
+			System.err.println();
+			}
+		}
 		String s = String.format("[time=%d]:[with N=%d nodes] [%d Total send message]", CommonState.getTime(), size,
 				(int) message.getSum());
-
 		System.err.println(s);
 
 		return false;
