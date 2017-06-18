@@ -57,7 +57,7 @@ public class Initialization implements Control {
 	public boolean execute() {
 		System.err.println("\nINICIALIZATION");
 		int size = Network.size();
-		int port = this.generatePort();
+		//int port = this.generatePort();
 		//int DHTSize = 1+2*d;
 		
 		//Dado que los Super-peer no tienen vecinos inicialmente
@@ -75,7 +75,7 @@ public class Initialization implements Control {
 			node.setSuper_peer(1);
 			node.setCache(CacheInicialization());
 			node.setBD(BDInicialization());
-			node.setPort(port);
+			node.setPort(this.generatePort());
 			try {
 				node.setHash(this.generateHash( (int) node.getID(), node.getPort()));
 			} catch (NoSuchAlgorithmException e) {
@@ -102,7 +102,8 @@ public class Initialization implements Control {
 		}
 		for(int i = 0; i < size; i++){
 			SNode3 node = (SNode3) Network.get(i);
-			System.out.println("\nNode "+ node.getID());
+			System.out.println("\nSuper-peer\tIP: "+ node.getID());
+			System.out.println("\tSuper-peer port: "+node.getPort());
 			System.out.println("\tHash:"+ node.getHash());
 			System.out.println("\tNeighbour Super-peer ID: "+ Network.get((int)((Linkable) node.getProtocol(0)).getNeighbor(0).getID()).getID());
 			System.out.println("\tSub-Net Nodes:");
@@ -224,10 +225,8 @@ public class Initialization implements Control {
 			node.getSubNet()[cant_nodos] = (int) node3.getID();
 			//System.out.println("La id del nodo creado es "+node3.getID());
 			if(agregado >40){
-				System.out.println("vecino directo");
 				((Linkable) node.getProtocol(0)).addNeighbor(node3);
 			} else{
-				System.out.println("Vecino indirecto");
 				idVecino = CommonState.r.nextInt(idNodeActual-idPrimerNode)+idPrimerNode;
 				//System.out.println("Se agregará como vecino al nodo "+idVecino);
 				((Linkable) Network.get(idVecino).getProtocol(0)).addNeighbor(node3);
