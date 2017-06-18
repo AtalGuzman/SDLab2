@@ -1,9 +1,14 @@
 package cl.usach.sd;
 
 import peersim.core.GeneralNode;
+import peersim.core.Linkable;
+import peersim.core.Network;
+
 import java.util.Stack;
 
 public class SNode3 extends GeneralNode {
+	//Determina si en super-peer o no
+	private int super_peer = 0;
 	//Tabla dht del nodo
 	private String[][] DHT;
 	
@@ -136,5 +141,18 @@ public class SNode3 extends GeneralNode {
 		for(int i = 0; i< this.DHT.length;i++){
 			System.out.println("\t\tID: "+this.DHT[i][0]+" Hash: "+this.DHT[i][1]);
 		}
+	}
+	public void showSubRed(){
+		int degree = ((Linkable)this.getProtocol(0)).degree();
+		for(int j = 1; j < degree; j++  ){
+			System.out.println("\t\tID: "+(int)((Linkable) this.getProtocol(0)).getNeighbor(j).getID());
+		}
+		return;
+	}
+	public int getSuper_peer() {
+		return super_peer;
+	}
+	public void setSuper_peer(int super_peer) {
+		this.super_peer = super_peer;
 	}
 }

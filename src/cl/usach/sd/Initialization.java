@@ -72,6 +72,7 @@ public class Initialization implements Control {
 		//Se inicializan los datos de cada nodo: la dht, la cache vacía
 		for(int i = 0; i < size; i++){
 			SNode3 node = (SNode3) Network.get(i);
+			node.setSuper_peer(1);
 			node.setCache(CacheInicialization());
 			node.setBD(BDInicialization());
 			node.setPort(port);
@@ -93,8 +94,10 @@ public class Initialization implements Control {
 			this.DHTInicialization(node);
 			System.out.println("\nNode "+ node.getID());
 			System.out.println("\tHash:"+ node.getHash());
-			System.out.println("\tNeighbour "+ Network.get((int)((Linkable) node.getProtocol(0)).getNeighbor(0).getID()).getID());
-			System.out.println("\tNodos en Sub-Red:");
+			System.out.println("\tNeighbour Super-peer ID: "+ Network.get((int)((Linkable) node.getProtocol(0)).getNeighbor(0).getID()).getID());
+			System.out.println("\tSub-Net Nodes:");
+			this.generateSubRed(node);
+			node.showSubRed();
 			node.showDht();
 			node.cacheShow();
 		}
@@ -180,5 +183,31 @@ public class Initialization implements Control {
 	private String generateHash(int id, int port) throws NoSuchAlgorithmException {
 		String s= Integer.toString(id)+Integer.toString(port);
 		return sha1(s);
+	}
+	
+	private void generateSubRed(SNode3 node){
+		int n = this.CANT_MIN_PEER;
+		int m = this.CANT_MAX_PEER;
+		int NetSize = CommonState.r.nextInt(m+1-n)+n;
+		int cant_nodos = 0;
+		
+		//System.out.println("El tamaño de la red es "+NetSize);
+
+		SNode3 node2 = (SNode3) node.clone();
+		node2.setCache(null);
+		node2.setDHT(null);
+		node2.setPort(-1);
+		node2.setSuper_peer(0);
+		//System.out.println("La id del nodo creado es "+node2.getID());
+		//System.out.println("El hash del nodo creado es "+node2.getHash());
+		((Linkable) node.getProtocol(0)).addNeighbor(node2);
+		
+		cant_nodos++;
+		
+		while(cant_nodos < NetSize){
+			SNode3 node3 = (SNode3) node2.clone();
+			((Linkable) node.getProtocol(0)).addNeighbor(node3);
+			cant_nodos++;
+		}
 	}
 }
