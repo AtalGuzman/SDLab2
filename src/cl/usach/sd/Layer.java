@@ -25,6 +25,13 @@ public class Layer implements Cloneable, EDProtocol {
 	 */
 	@Override
 	public void processEvent(Node myNode, int layerId, Object event) {
+		int superpeer = 0;
+
+		for(int i = 0; i < Network.size();i++){
+			SNode3 node =(SNode3) Network.get(i);
+			if(node.getSuper_peer() == 1) superpeer++;
+		}
+		
 		System.out.println("LAYER [time ="+CommonState.getTime()+"]");
 		Message msg = (Message) event;
 		System.out.println("Current_Node: "+myNode.getID() );
@@ -142,11 +149,8 @@ public class Layer implements Cloneable, EDProtocol {
 		//Se obtiene la distancia entre el destino y el mejor nodo actual
 			int minDistance = moduleMinus(destination, (int) bestNextNode.getID());
 			
-			int DHTElements = 0;
-		//Se calculan los elementos validos en la DHT
-			while(DHTElements<((SNode3) currentNode).getDHT().length && ((SNode3) currentNode).getDHT()[DHTElements]>0) DHTElements++;
-			
-			
+			int DHTElements = (int) Math.floor(Math.log(Network.size())/Math.log(2));
+
 		
 		//Se deben verificar si existen mejor distancias con los elementos de la DHT
 			for(int i = 0; i < DHTElements;i++){

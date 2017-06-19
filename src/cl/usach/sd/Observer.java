@@ -18,19 +18,21 @@ public class Observer implements Control {
 		this.prefix = prefix;
 		this.layerId = Configuration.getPid(prefix + ".protocol");
 	}
-
+	
 	@Override
 	public boolean execute() {
 		int size = Network.size();
-		System.err.println("Información sobre los Super-peer");
+		int superpeer = 0;
+		System.err.println("\nInformación sobre los Super-peer\n");
 		for (int i = 0; i < Network.size(); i++) {
 			SNode3 node = (SNode3) Network.get(i);
 			if (!node.isUp()) {
 				size--;
 			}
 			if(node.getSuper_peer() == 1){
+				superpeer++;
 				System.err.print("Super-peer ");
-			System.err.print("ID: "+node.getID()+"\t Vecino: "+ ((Linkable) node.getProtocol(0)).getNeighbor(0).getID()+"\t");
+			System.err.print("IP: "+node.getID()+"\t Vecino: "+ ((Linkable) node.getProtocol(0)).getNeighbor(0).getID()+"\tPuerto: "+node.getPort()+"\t");
 			System.err.print("DHT: ");
 			
 			for(int j = 0; j < node.getDHT().length;j++){
@@ -49,30 +51,36 @@ public class Observer implements Control {
 			}
 			
 			System.err.println();
-			}
-			
+			}	
 		}
 		
-		System.err.println("Información sobre sub red");
+		System.err.println("\nInformación sobre sub red");
 		
 		for (int i = 0; i < Network.size(); i++) {
 			SNode3 node = (SNode3) Network.get(i);
 			if(node.getSuper_peer()==1){
-				System.err.print("SUB-RED "+node.getID());
+				System.err.print("\nSUB-RED "+node.getID());
 				System.err.print("("+node.getSubNet().length+" peers + 1 Super-peer)");
 				for(int j = 0; j < node.getSubNet().length;j++){
 					System.err.println();
 					SNode3 node2 = (SNode3) Network.get(node.getSubNet()[j]);
-					System.err.print("\tIP: "+node2.getID());
-					System.err.print("Neighbours: ");
+					System.err.print("\tIP: "+node2.getID()+" ");
+					System.err.print("\tNeighbours: ");
 					int degree = ((Linkable) node2.getProtocol(0)).degree();
 					for(int k = 0; k < degree;k++){
 						System.err.print(((Linkable) node2.getProtocol(0)).getNeighbor(k).getID()+" ");
+					}
+					System.err.print("\t\tBD: ");
+					for(int k = 0; k < node2.getBD().length;k++){
+						System.err.print(node2.getBD()[k]+" ");
 					}
 				}
 			System.err.println();
 			}
 		}
+		int cantPeers =size-superpeer;
+		System.err.println("\nEn la red hay: "+size+" nodos ("+cantPeers+" peers + "+superpeer+" Super-peers)\n");
+
 		String s = String.format("[time=%d]:[with N=%d nodes] [%d Total send message]", CommonState.getTime(), size,
 				(int) message.getSum());
 		System.err.println(s);

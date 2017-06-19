@@ -23,7 +23,7 @@ public class Initialization implements Control {
 	int BD_SIZE;
 	int TTL;
 	int CANT_RANDOM_WALKS; 
-
+	SNode3 nodeClone;
 	public Initialization(String prefix) {
 		this.prefix = prefix;
 
@@ -56,7 +56,11 @@ public class Initialization implements Control {
 	@Override
 	public boolean execute() {
 		System.err.println("\nINICIALIZATION");
-		int size = Network.size();
+		int size = Network.size()-1;
+		this.nodeClone = (SNode3) Network.get(size);
+		this.nodeClone.setSuper_peer(-1); //Este nodo es muy especial, porque es utilizado para realizar los clones de los nodos a agregar a las sub red que tienen asociada cada uno de los super peer.
+		
+		System.err.println("NODO DE CLONACIÓN: "+nodeClone.getID());
 		//int port = this.generatePort();
 		//int DHTSize = 1+2*d;
 		
@@ -83,10 +87,6 @@ public class Initialization implements Control {
 				e.printStackTrace();
 			}
 		}	
-		
-		
-		//Se pueblan todas las base de datos
-		//BDPopulate();
 
 		//Se muestran por pantalla los datos de la red
 		for(int i = 0; i < size; i++){
@@ -97,9 +97,14 @@ public class Initialization implements Control {
 		//Se inicializa la sub red
 		for(int i = 0; i < size; i++){
 			SNode3 node = (SNode3) Network.get(i);
-			this.generateSubRed(node);
+			if(node.getSuper_peer()==1){
+				//System.out.println("Crearé una sub red para el Super peer "+node.getID());
+				this.generateSubRed(node);
+			}
 			
 		}
+		//Se pueblan todas las base de datos
+		BDPopulate();
 		for(int i = 0; i < size; i++){
 			SNode3 node = (SNode3) Network.get(i);
 			System.out.println("\nSP ID: "+node.getID()+"\tIP: "+ node.getID()+"\tPort: "+node.getPort());
@@ -118,10 +123,14 @@ public class Initialization implements Control {
 	 * datos no se van a repetir en cada nodo
 	 * */
 	private void BDPopulate(){
-		for(int i = 0; i < this.BD_SIZE; i++){
+		int elementosBaseDeDatos  = this.BD_SIZE*Network.size();
+		//System.out.println("Se agregarán "+elementosBaseDeDatos+" a la base de datos");
+		for(int i = (int) this.nodeClone.getID(); i <elementosBaseDeDatos; i++){
 			SNode3 node = (SNode3) Network.get(i%Network.size());
-			int bdIndex = new Double(i/Network.size()).intValue();
-			node.getBD()[bdIndex] = i;
+			if(node.getSuper_peer()==0){
+				int bdIndex = new Double(i/Network.size()).intValue();
+				node.getBD()[bdIndex] = i;
+			}
 		}
 	}
 	
@@ -159,7 +168,7 @@ public class Initialization implements Control {
 		node.setDHT(new String[m][2]);
 		//System.out.println("El tamaño del dht es "+m);
 		for(int i = 0; i < m; i++){
-			int id = (int)( node.getID()+ Math.pow(2, i))%Network.size();
+			int id = (int)( node.getID()+ Math.pow(2, i))%(Network.size()-1);
 			//System.out.println("La id a buscar corresponde a "+id);
 			SNode3 dhtNode = (SNode3) Network.get(id);
 			node.getDHT()[i][0] = Integer.toString((int)dhtNode.getID());
@@ -199,36 +208,35 @@ public class Initialization implements Control {
 		int m = this.CANT_MAX_PEER;
 		int NetSize = CommonState.r.nextInt(m+1-n)+n;
 		int cant_nodos = 0;
-		
 		//System.out.println("El tamaño de la red es "+NetSize);
-
-		SNode3 node2 = (SNode3) node.clone();
-		node2.setCache(null);
-		node2.setDHT(null);
-		node2.setPort(-1);
+		SNode3 node2 = (SNode3) this.nodeClone.clone();
 		node2.setSuper_peer(0);
+		node2.setBD(this.BDInicialization());
 		Network.add(node2);
-		((Linkable) node.getProtocol(0)).addNeighbor(node2);
+		((Linkable) node2.getProtocol(0)).addNeighbor(node);
 		int idPrimerNode = (int) node2.getID();
 		int idVecino = 0;
 		int agregado = 0;
 		node.setSubNet(new int[NetSize]);
 		node.getSubNet()[cant_nodos] = (int) node2.getID();
 		cant_nodos++;
-
+		//System.out.println("Se agregara el nodo"+node2.getID()+"al Super peer");
 		while(cant_nodos < NetSize){
-			SNode3 node3 = (SNode3) node2.clone();
+			SNode3 node3 = (SNode3) this.nodeClone.clone();
 			int idNodeActual = (int) node3.getID();
+			node3.setSuper_peer(0);
 			agregado = CommonState.r.nextInt(100);
 			Network.add(node3);
+			node3.setBD(this.BDInicialization());
 			node.getSubNet()[cant_nodos] = (int) node3.getID();
-			//System.out.println("La id del nodo creado es "+node3.getID());
-			if(agregado >40){
-				((Linkable) node.getProtocol(0)).addNeighbor(node3);
+			//System.out.println("La probabilidad de agregado es"+agregado);
+			if(agregado <30){
+				//System.out.println("Se agregara el nodo"+node3.getID()+"al Super peer");
+				((Linkable) node3.getProtocol(0)).addNeighbor(node);
 			} else{
 				idVecino = CommonState.r.nextInt(idNodeActual-idPrimerNode)+idPrimerNode;
-				//System.out.println("Se agregará como vecino al nodo "+idVecino);
-				((Linkable) Network.get(idVecino).getProtocol(0)).addNeighbor(node3);
+				//System.out.println("Se agregará el nodo "+node3.getID()+" como vecino al nodo "+idVecino);
+				((Linkable) node3.getProtocol(0)).addNeighbor(Network.get(idVecino));
 			}
 			cant_nodos++;
 		}
