@@ -36,7 +36,9 @@ public class Observer implements Control {
 			System.err.print("DHT: ");
 			
 			for(int j = 0; j < node.getDHT().length;j++){
-				System.err.print(node.getDHT()[j][1].substring(0,1)+" ");
+				System.err.print(node.getDHT()[j][1].substring(0,3)+" ");
+				System.err.print("(ID: "+node.getDHT()[j][0]+") ");
+
 			}
 			System.err.print("\tCache: ");
 
@@ -78,7 +80,8 @@ public class Observer implements Control {
 			System.err.println();
 			}
 		}
-		int cantPeers =size-superpeer;
+		int cantPeers =size-superpeer-1;
+		size = size-1;
 		System.err.println("\nEn la red hay: "+size+" nodos ("+cantPeers+" peers + "+superpeer+" Super-peers)\n");
 
 		String s = String.format("[time=%d]:[with N=%d nodes] [%d Total send message]", CommonState.getTime(), size,

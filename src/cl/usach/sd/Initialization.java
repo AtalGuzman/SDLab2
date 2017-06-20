@@ -80,6 +80,7 @@ public class Initialization implements Control {
 			node.setCache(CacheInicialization());
 			node.setBD(BDInicialization());
 			node.setPort(this.generatePort());
+			node.setMiSubNet( (int) node.getID());
 			try {
 				node.setHash(this.generateHash( (int) node.getID(), node.getPort()));
 			} catch (NoSuchAlgorithmException e) {
@@ -212,6 +213,7 @@ public class Initialization implements Control {
 		SNode3 node2 = (SNode3) this.nodeClone.clone();
 		node2.setSuper_peer(0);
 		node2.setBD(this.BDInicialization());
+		node2.setMiSubNet((int)node.getID());
 		Network.add(node2);
 		((Linkable) node2.getProtocol(0)).addNeighbor(node);
 		int idPrimerNode = (int) node2.getID();
@@ -219,6 +221,7 @@ public class Initialization implements Control {
 		int agregado = 0;
 		node.setSubNet(new int[NetSize]);
 		node.getSubNet()[cant_nodos] = (int) node2.getID();
+	
 		cant_nodos++;
 		//System.out.println("Se agregara el nodo"+node2.getID()+"al Super peer");
 		while(cant_nodos < NetSize){
@@ -228,6 +231,7 @@ public class Initialization implements Control {
 			agregado = CommonState.r.nextInt(100);
 			Network.add(node3);
 			node3.setBD(this.BDInicialization());
+			node3.setMiSubNet((int)node.getID());
 			node.getSubNet()[cant_nodos] = (int) node3.getID();
 			//System.out.println("La probabilidad de agregado es"+agregado);
 			if(agregado <30){

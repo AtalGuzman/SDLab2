@@ -24,6 +24,8 @@ public class SNode3 extends GeneralNode {
 	
 	private int[] subNet;
 	
+	private int miSubNet;
+	
 	public SNode3(String prefix) {
 		super(prefix);
 	}
@@ -161,5 +163,11 @@ public class SNode3 extends GeneralNode {
 	}
 	public void setSubNet(int[] subNet) {
 		this.subNet = subNet;
+	}
+	public int getMiSubNet() {
+		return miSubNet;
+	}
+	public void setMiSubNet(int miSubNet) {
+		this.miSubNet = miSubNet;
 	}
 }
