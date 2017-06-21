@@ -8,6 +8,7 @@ import peersim.core.Network;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Stack;
 
 public class Initialization implements Control {
@@ -81,6 +82,7 @@ public class Initialization implements Control {
 			node.setBD(this.BDInicialization());
 			node.setPort(this.generatePort());
 			node.setMiSubNet( (int) node.getID());
+			node.setMsg(new ArrayList<String>());
 			try {
 				node.setHash(this.generateHash( (int) node.getID(), node.getPort()));
 			} catch (NoSuchAlgorithmException e) {

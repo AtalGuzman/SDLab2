@@ -29,7 +29,6 @@ public class TrafficGenerator implements Control {
 		while(initNode.getSuper_peer() != 0){
 			 initNode = (SNode3) Network.get(CommonState.r.nextInt(Network.size()));
 		}
-		System.out.println("En la red existen "+cant_super+" super peers");
 		
 		//Parámetros para la creación del mensaje	
 		int sendId = CommonState.r.nextInt(cant_super);
@@ -37,7 +36,7 @@ public class TrafficGenerator implements Control {
 		
 		int query = CommonState.r.nextInt(Network.size()-cant_super)+cant_super;
 		
-		System.out.println("Se solicita el documento "+query+" al super-peer "+sendId);
+		System.out.println("Nodo "+initNode.getID()+" solicita el documento "+query+" al super-peer "+sendId);
 		
 		System.out.println("\t\nGENERATOR NODE: "+initNode.getID()+"\n");
 		//Creación del mensaje
@@ -55,11 +54,9 @@ public class TrafficGenerator implements Control {
 		}
 		msg.getPath().push((int)initNode.getID());
 
-		msg.setDestination(0);
-		msg.setQuery(45);
-		
-		System.out.println("\nMensaje destino final: "+msg.getDestination()+" mensaje super-peer: "+msg.getSuperPeer()+ "\n mensaje solicitud "+msg.getQuery()+" mensaje remitent: "+msg.getRemitent()
-				);
+		//msg.setDestination(0);
+		//msg.setQuery(45);
+		msg.setId(Integer.toString(msg.getDestination())+Integer.toString(msg.getQuery())+Integer.toString(msg.getRemitent()));
 		//Se agrega al camino del mensaje la id del nodo precursor
 		EDSimulator.add(0, msg, initNode, layerId);
 

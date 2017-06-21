@@ -22,7 +22,9 @@ public class Message {
 	//Se inicializa el camino del mensaje como un stack, para
 	//que sea sencillo recorrerlo inversamente
 	private Stack<Integer> path = new Stack<Integer>();
-		
+	
+	private String id;
+	
 	//Se inicializa el camino del mensaje como un stack, para
 	//que sea sencillo recorrerlo inversamente
 	
@@ -90,6 +92,14 @@ public class Message {
 
 	public void setPath(Stack<Integer> path) {
 		this.path = path;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 	
 }

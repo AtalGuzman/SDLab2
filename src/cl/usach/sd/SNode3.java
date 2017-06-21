@@ -4,6 +4,7 @@ import peersim.core.GeneralNode;
 import peersim.core.Linkable;
 import peersim.core.Network;
 
+import java.util.ArrayList;
 import java.util.Stack;
 
 public class SNode3 extends GeneralNode {
@@ -25,6 +26,8 @@ public class SNode3 extends GeneralNode {
 	private int[] subNet;
 	
 	private int miSubNet;
+	
+	private ArrayList<String> msg;
 	
 	public SNode3(String prefix) {
 		super(prefix);
@@ -167,6 +170,10 @@ public class SNode3 extends GeneralNode {
 		}
 		return;
 	}
+	
+	public boolean msgRegister(String msg){
+		return this.msg.contains(msg);
+	}
 	public int getSuper_peer() {
 		return super_peer;
 	}
@@ -184,5 +191,11 @@ public class SNode3 extends GeneralNode {
 	}
 	public void setMiSubNet(int miSubNet) {
 		this.miSubNet = miSubNet;
+	}
+	public ArrayList<String> getMsg() {
+		return msg;
+	}
+	public void setMsg(ArrayList<String> msg) {
+		this.msg = msg;
 	}
 }

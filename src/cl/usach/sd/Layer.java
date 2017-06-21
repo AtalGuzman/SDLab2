@@ -39,32 +39,37 @@ public class Layer implements Cloneable, EDProtocol {
 		
 		//Si el nodo actual es el destino del mensaje
 		if(msg.getDestination() == myNode.getID()){
-			
-		//Si no tiene ningún dato, quiere decir que debo responder una query
-			if(msg.getData() < 0){
-				System.out.println("He recibido una solicitud");
-		//Se muestran los datos
-				System.out.println("\tQuery received\n\t[super-peer_destination,\tdata_id,\tdata]\n\t["+msg.getDestination()+",\t"+msg.getQuery()+",\t?]");
-				//sendmessage(myNode, layerId, (Object) answer);
-				System.out.println("\tK-Random walker en sub red, para búsqueda del documento");
-				msg.getPath().push((int)myNode.getID());
-				msg.setTtl(ttl);
-				this.krandom(this.k, msg, (SNode3) myNode);
-			}else{
-		//EL mensaje corresponde a una respuesta.
-				if(((SNode3) myNode).getSuper_peer() == 1){
-					System.out.println("\tActualizar Caché");
-					((SNode3) myNode).cacheUpdate(msg.getRemitent(),((SNode3) Network.get(msg.getRemitent())).getMiSubNet(), msg.getData(), msg.getData());
+			if(!((SNode3) myNode).getMsg().contains(msg.getId())){
+			//Si no tiene ningún dato, quiere decir que debo responder una query
+				if(msg.getData() < 0){
+					((SNode3) myNode).getMsg().add(msg.getId());
+					System.out.println("He recibido una solicitud");
+			//Se muestran los datos
+					System.out.println("\tQuery \n\t[super-peer_destination, data_id, data, ttl]\n\t["+msg.getDestination()+",\t"+msg.getQuery()+",\t?, "+msg.getTtl()+"]");
+					//sendmessage(myNode, layerId, (Object) answer);
+					msg.getPath().push((int)myNode.getID());
+					msg.setTtl(ttl);
+					this.krandom(this.k, msg, (SNode3) myNode);
+					
+				}else{
+			//EL mensaje corresponde a una respuesta.
+					if(((SNode3) myNode).getSuper_peer() == 1){
+						System.out.println("\tActualizar Caché");
+						((SNode3) myNode).cacheUpdate(msg.getRemitent(),((SNode3) Network.get(msg.getRemitent())).getMiSubNet(), msg.getData(), msg.getData());
+					}
+					if(msg.getPath().isEmpty()){
+						System.out.println("Se ha finalizado la consulta");
+						System.out.println("\tQuery Answered\n\t[node, super_peer, data_id, data]\n\t["+msg.getRemitent()+",\t"+((SNode3) Network.get(msg.getRemitent())).getMiSubNet()+",\t"+msg.getQuery()+",\t"+msg.getData()+"]");
+					}
+					else{
+						int nextNode = msg.getPath().pop();
+						msg.setDestination(nextNode);
+						this.sendmessage(myNode, Network.get(nextNode), layerId, msg);
+					}
 				}
-				if(msg.getPath().isEmpty()){
-					System.out.println("Se ha finalizado la consulta");
-					System.out.println("\tQuery Answered\n\t[node, super_peer, data_id, data]\n\t["+msg.getRemitent()+",\t"+((SNode3) Network.get(msg.getRemitent())).getMiSubNet()+",\t"+msg.getQuery()+",\t"+msg.getData()+"]");
-				}
-				else{
-					int nextNode = msg.getPath().pop();
-					msg.setDestination(nextNode);
-					this.sendmessage(myNode, Network.get(nextNode), layerId, msg);
-				}
+			} 
+			else{
+				System.out.println("\tMENSAJE REDUNDANTE ID: "+msg.getId());
 			}
 		}
 		else{
@@ -74,16 +79,22 @@ public class Layer implements Cloneable, EDProtocol {
 		//Si soy un nodo intermediario
 				if( ((SNode3) myNode).getSuper_peer() == 1){
 		//Si es un super-peer se debe utilizar chord
-					System.out.println("\tSuper-peer "+myNode.getID()+"\n\tCHORD");
-					msg.getPath().push((int)myNode.getID());
-					System.out.println("\tQuery \n\t[super-peer_destination, data_id, data]\n\t["+msg.getDestination()+",\t"+msg.getQuery()+",\t?]");
-					//System.out.println("\tQuery answered \n\t[node_destination,\tdata_id,\tdata]\n\t["+answer.getDestination()+",\t"+answer.getQuery()+",\t"+answer.getData()+"]");
-					msg.setTtl(msg.getTtl()-1);
-					if(msg.getTtl()<=0){
-						System.out.println("\tSe ha acabado el ttl de la query");
-					} 
-					else{ 
-						sendMessageChord(myNode, layerId, (Object) msg,superpeer);	
+					if(!((SNode3) myNode).msgRegister(msg.getId())){
+						System.out.println("\tSuper-peer "+myNode.getID()+"\n\tCHORD");
+						msg.getPath().push((int)myNode.getID());
+						System.out.println("\tMENSAJE ID: "+msg.getId());
+						System.out.println("\tQuery \n\t[super-peer_destination, data_id, data, ttl]\n\t["+msg.getDestination()+",\t"+msg.getQuery()+",\t?, "+msg.getTtl()+"]");
+						//System.out.println("\tQuery answered \n\t[node_destination,\tdata_id,\tdata]\n\t["+answer.getDestination()+",\t"+answer.getQuery()+",\t"+answer.getData()+"]");
+						msg.setTtl(this.ttl);
+						if(msg.getTtl()<=0){
+							System.out.println("\tSe ha acabado el ttl de la query");
+						} 
+						else{ 
+							((SNode3) myNode).getMsg().add(msg.getId());
+							sendMessageChord(myNode, layerId, (Object) msg,superpeer);	
+						}
+					} else{
+						System.out.println("\tMENSAJE REDUNDANTE ID: "+msg.getId());
 					}
 				}
 				else if(((SNode3) myNode).getSuper_peer() == 0){
@@ -102,7 +113,8 @@ public class Layer implements Cloneable, EDProtocol {
 		//Si soy un peer normal se debe utilizar k-random walks
 						if(((SNode3) myNode).getSubNet() != ((SNode3) Network.get(msg.getRemitent())).getSubNet()) System.out.println("\tNO SE HA ENCONTRADO LA SOLICITUD EN LA SUB-RED");
 						System.out.println("\tSoy un peer normal, debo continuar con K-random");
-						System.out.println("\tQuery \n\t[super-peer_destination, data_id, data]\n\t["+msg.getDestination()+",\t"+msg.getQuery()+",\t?]");
+						System.out.println("\tMENSAJE ID: "+msg.getId());
+						System.out.println("\tQuery \n\t[super-peer_destination, data_id, data, ttl]\n\t["+msg.getDestination()+",\t"+msg.getQuery()+",\t?, "+msg.getTtl()+"]");
 						msg.setTtl(msg.getTtl()-1);
 						if(msg.getTtl()<=0){
 							System.out.println("\tSe ha acabado el ttl de la query");
@@ -113,21 +125,24 @@ public class Layer implements Cloneable, EDProtocol {
 					}		
 					else if(encontrado == 1){
 						System.out.println("\tSe ha encontrado la Query");
-						System.out.println("\tQuery \n\t[super-peer_destination, data_id, data]\n\t["+msg.getDestination()+",\t"+msg.getQuery()+",\t?]");
+						System.out.println("\tQuery \n\t[super-peer_destination, data_id, data, ttl]\n\t["+msg.getDestination()+",\t"+msg.getQuery()+",\t?, "+msg.getTtl()+"]");
 						Message answer = msg;
 						answer.setRemitent((int) myNode.getID());
 						answer.setData( ((SNode3) myNode).getBD()[index] );
 						int nextNode = answer.getPath().pop();
 						answer.setDestination(nextNode);
+						answer.setId(Integer.toString(answer.getDestination())+Integer.toString(answer.getQuery())+Integer.toString(answer.getRemitent()));
+						System.out.println("\tMENSAJE ID: "+answer.getId());
 						System.out.println("\tSe enviará el mensaje a "+nextNode);
 						this.sendmessage(myNode, Network.get(nextNode),layerId, answer);
 					}
-				} else { /*Nada*/}
+				} else {/*Nada*/}
 			}
 			else{
 		//Si soy el que mandó la solicitud, debo iniciar la búsqueda en k-random hacia el super-peer
 				System.out.println("\tSe inicia la búsqueda k-random walks");
-				System.out.println("\tQuery \n\t[super-peer_destination,\tdata_id,\tdata]\n\t["+msg.getDestination()+",\t"+msg.getQuery()+",\t?]");
+				System.out.println("\tQuery \n\t[super-peer_destination, data_id, data, ttl]\n\t["+msg.getDestination()+",\t"+msg.getQuery()+",\t?, "+msg.getTtl()+"]");
+				System.out.println("\tMENSAJE ID: "+msg.getId());
 				this.krandom(this.k, msg, (SNode3) myNode);
 			}
 		}
@@ -158,8 +173,8 @@ public class Layer implements Cloneable, EDProtocol {
 					minDistance = tempDistance;
 				}
 			}
-			System.out.println("\t\tBest next node Hash: "+ ((SNode3) bestNextNode).getHash().substring(0, 3)+ "(ID: "+bestNextNode.getID()+")");
-			System.out.println("\t\tNext Nodes's distance to destiny: "+ minDistance);
+			System.out.println("\t\tHash mejor nodo: "+ ((SNode3) bestNextNode).getHash().substring(0, 3)+ "(ID: "+bestNextNode.getID()+")");
+			System.out.println("\t\tDistancia del siguiente nodo al destino: "+ minDistance);
 		}
 		else{
 		//Si es una respuesta, entonces solo se debe enviar al nodo que está
@@ -209,8 +224,8 @@ public class Layer implements Cloneable, EDProtocol {
 	private void krandom(int k, Message msg, SNode3 node){
 		int destiny = 0;
 		int degree = ((Linkable) node.getProtocol(0)).degree();
+		System.out.println("\tSE ENVÍAN "+k+" WALKERS");
 		if(node.getSuper_peer() == 1){
-			System.out.println("\tK random desde Super-peer hacia su sub red");
 			for(int i = 0; i< k && i < degree; i++){
 				destiny = CommonState.r.nextInt(degree);
 				SNode3 nextNode = (SNode3) ((Linkable) node.getProtocol(0)).getNeighbor(destiny);
@@ -219,7 +234,7 @@ public class Layer implements Cloneable, EDProtocol {
 					destiny = CommonState.r.nextInt(degree);
 					nextNode = (SNode3) ((Linkable) node.getProtocol(0)).getNeighbor(destiny);
 				}
-				nextNode = (SNode3) Network.get(6);
+				//nextNode = (SNode3) Network.get(6);
 				System.out.println("\tRandom Walk hacia: "+nextNode.getID());
 				sendmessage(node, nextNode, layerId, (Object) msg);
 			}
