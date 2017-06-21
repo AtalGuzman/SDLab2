@@ -91,9 +91,12 @@ public class SNode3 extends GeneralNode {
 
 	/* Método para actualizar la caché cuando el mensaje realiza
 	 * el camino inverso como una respuesta.
-	 * En caso de que el caché esté lleno se hace una política FIFO
+	 * En caso de que el caché esté lleno se hace una política LRU
+	 * Por lo tanto, se van guardando los momentos de cada vez que se realiza una consulta
+	 * en el quinto registro del caché
 	 * Recibe como entrada:
 	 * 		nodeId: id del nodo que tenía originalmente el dato
+	 * 		superId: id del super-peer que maneja la sub-red
 	 * 		query: id del dato en la base de datos del nodo que lo posee
 	 * 		data: información guardada en la base de datos
 	 * */
@@ -104,7 +107,8 @@ public class SNode3 extends GeneralNode {
 			this.cacheShow();
 			int index = 0;
 			int max = this.Cache[0][4];
-
+			//Se verifica cuál es el que no ha sido utilizado en la 
+			//mayor cantidad de tiempo
 			for(int i = 0; i< this.Cache.length-1;i++){
 				if(max <this.Cache[i][4]){
 					max = this.Cache[i][4];
