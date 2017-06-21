@@ -91,7 +91,7 @@ public class SNode3 extends GeneralNode {
 	 * 		query: id del dato en la base de datos del nodo que lo posee
 	 * 		data: información guardada en la base de datos
 	 * */
-	public void cacheUpdate(int nodeId,int query,int data){
+	public void cacheUpdate(int nodeId, int superId, int query,int data){
 		if(this.Cache[this.Cache.length-1][0] != -1){
 			System.out.println("\tFULL CACHE-FIFO");
 			System.out.println("\tCache deprecated");
@@ -100,18 +100,21 @@ public class SNode3 extends GeneralNode {
 			for(i = 0; i< this.Cache.length-1;i++){
 				this.Cache[i][0] = this.Cache[i+1][0];
 				this.Cache[i][1] = this.Cache[i+1][1];
-				this.Cache[i][2] = this.Cache[i+1][2]; 
+				this.Cache[i][2] = this.Cache[i+1][2];
+				this.Cache[i][3] = this.Cache[i+1][3];
 			}
 			this.Cache[i][0] = nodeId;
-			this.Cache[i][1] = query;
-			this.Cache[i][2] = data;		
+			this.Cache[i][1] = superId;
+			this.Cache[i][2] = query;	
+			this.Cache[i][3] = data;
 		}
 		else{
 			int index = 0;
 			while(this.Cache[index][0]>=0) index++; 
 			this.Cache[index][0] = nodeId;
-			this.Cache[index][1] = query;
-			this.Cache[index][2] = data;			
+			this.Cache[index][1] = superId;
+			this.Cache[index][2] = query;	
+			this.Cache[index][3] = data;
 		}
 	}
 	

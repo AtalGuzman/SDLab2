@@ -17,7 +17,9 @@ public class Observer implements Control {
 	public Observer(String prefix) {
 		this.prefix = prefix;
 		this.layerId = Configuration.getPid(prefix + ".protocol");
+	
 	}
+	
 	
 	@Override
 	public boolean execute() {
@@ -43,7 +45,7 @@ public class Observer implements Control {
 			System.err.print("\tCache: ");
 
 			for(int j = 0; j < node.getCache().length;j++){
-				if(node.getCache()[j][0] > -1) System.err.print("[NODE: "+node.getCache()[j][0]+" DATA_ID: "+node.getCache()[j][1]+" DATA: "+node.getCache()[j][2]+"] ");
+				if(node.getCache()[j][0] > -1) System.err.print("[NODE: "+node.getCache()[j][0]+" SUB_RED: "+node.getCache()[j][1]+" DATA_ID: "+node.getCache()[j][2]+" DATA: "+node.getCache()[j][3]+"] ");
 				else System.err.print("[]");
 			}
 			

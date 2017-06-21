@@ -53,6 +53,10 @@ public class TrafficGenerator implements Control {
 		for(int k = 0; k < initNode.getBD().length;k++){
 			System.out.print(initNode.getBD()[k]+" ");
 		}
+		msg.getPath().push((int)initNode.getID());
+
+		msg.setDestination(0);
+		msg.setQuery(45);
 		
 		System.out.println("\nMensaje destino final: "+msg.getDestination()+" mensaje super-peer: "+msg.getSuperPeer()+ "\n mensaje solicitud "+msg.getQuery()+" mensaje remitent: "+msg.getRemitent()
 				);

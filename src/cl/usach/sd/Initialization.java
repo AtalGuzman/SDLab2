@@ -31,7 +31,7 @@ public class Initialization implements Control {
 		this.idTransport = Configuration.getPid(prefix + ".transport");
 
 		System.err.println("NET PARAMETERS");
-		this.CANT_DE_SUPERPEER = Configuration.getInt(prefix + ".s");
+		this.CANT_DE_SUPERPEER = Network.size();
 		this.CANT_MIN_PEER = Configuration.getInt(prefix + ".n");
 		this.CANT_MAX_PEER = Configuration.getInt(prefix+".m");
 		this.CACHE_SIZE = Configuration.getInt(prefix+".c");
@@ -147,7 +147,7 @@ public class Initialization implements Control {
 	 * exclusivamente con -1
 	 * */
 	private int[][] CacheInicialization(){
-		int[][] cache =  new int[this.CACHE_SIZE][3];
+		int[][] cache =  new int[this.CACHE_SIZE][4];
 		
 		for(int i = 0; i < this.CACHE_SIZE; i++){
 			for(int j = 0; j < 3; j++){
@@ -216,6 +216,8 @@ public class Initialization implements Control {
 		node2.setMiSubNet((int)node.getID());
 		Network.add(node2);
 		((Linkable) node2.getProtocol(0)).addNeighbor(node);
+		((Linkable) node.getProtocol(0)).addNeighbor(node2);
+
 		int idPrimerNode = (int) node2.getID();
 		int idVecino = 0;
 		int agregado = 0;
@@ -237,10 +239,13 @@ public class Initialization implements Control {
 			if(agregado <30){
 				//System.out.println("Se agregara el nodo"+node3.getID()+"al Super peer");
 				((Linkable) node3.getProtocol(0)).addNeighbor(node);
+				((Linkable) node.getProtocol(0)).addNeighbor(node3);
 			} else{
 				idVecino = CommonState.r.nextInt(idNodeActual-idPrimerNode)+idPrimerNode;
 				//System.out.println("Se agregará el nodo "+node3.getID()+" como vecino al nodo "+idVecino);
 				((Linkable) node3.getProtocol(0)).addNeighbor(Network.get(idVecino));
+				((Linkable) Network.get(idVecino).getProtocol(0)).addNeighbor(node3);
+
 			}
 			cant_nodos++;
 		}

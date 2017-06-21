@@ -1,5 +1,7 @@
 package cl.usach.sd;
 import java.util.Stack;
+
+import peersim.config.Configuration;
 /**
  * Clase la cual vamos a utilizar para enviar datos de un Peer a otro
  */
@@ -15,7 +17,12 @@ public class Message {
 	
 	private int superPeer = 0;
 	
-	private int ttl;
+	private int ttl = Configuration.getInt("init.1statebuilder.ttl");
+	
+	//Se inicializa el camino del mensaje como un stack, para
+	//que sea sencillo recorrerlo inversamente
+	private Stack<Integer> path = new Stack<Integer>();
+		
 	//Se inicializa el camino del mensaje como un stack, para
 	//que sea sencillo recorrerlo inversamente
 	
@@ -25,6 +32,7 @@ public class Message {
 		this.setQuery(query);
 		this.setRemitent(remitent);
 		this.setSuperPeer(superPeer);
+		
 	}
 	
 	/**Setters y getters de cada uno de los atributos del mensaje**/
@@ -66,6 +74,22 @@ public class Message {
 
 	public void setSuperPeer(int superPeer) {
 		this.superPeer = superPeer;
+	}
+
+	public int getTtl() {
+		return ttl;
+	}
+
+	public void setTtl(int ttl) {
+		this.ttl = ttl;
+	}
+
+	public Stack<Integer> getPath() {
+		return path;
+	}
+
+	public void setPath(Stack<Integer> path) {
+		this.path = path;
 	}
 	
 }
