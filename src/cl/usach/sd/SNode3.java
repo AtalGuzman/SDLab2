@@ -78,6 +78,12 @@ public class SNode3 extends GeneralNode {
 				answer[0] = this.Cache[i][0];
 				answer[1] = this.Cache[i][1];
 				answer[2] = this.Cache[i][2];
+				answer[3] = this.Cache[i][3];
+				answer[4] = 0;
+				this.Cache[i][4] = 0;
+			}
+			else{
+				this.Cache[i][4]++;
 			}
 		}
 		return answer;
@@ -93,20 +99,22 @@ public class SNode3 extends GeneralNode {
 	 * */
 	public void cacheUpdate(int nodeId, int superId, int query,int data){
 		if(this.Cache[this.Cache.length-1][0] != -1){
-			System.out.println("\tFULL CACHE-FIFO");
+			System.out.println("\tFULL CACHE-LRU");
 			System.out.println("\tCache deprecated");
 			this.cacheShow();
-			int i = 0;
-			for(i = 0; i< this.Cache.length-1;i++){
-				this.Cache[i][0] = this.Cache[i+1][0];
-				this.Cache[i][1] = this.Cache[i+1][1];
-				this.Cache[i][2] = this.Cache[i+1][2];
-				this.Cache[i][3] = this.Cache[i+1][3];
+			int index = 0;
+			int max = this.Cache[0][4];
+
+			for(int i = 0; i< this.Cache.length-1;i++){
+				if(max <this.Cache[i][4]){
+					max = this.Cache[i][4];
+					index = i;
+				}
 			}
-			this.Cache[i][0] = nodeId;
-			this.Cache[i][1] = superId;
-			this.Cache[i][2] = query;	
-			this.Cache[i][3] = data;
+			this.Cache[index][0] = nodeId;
+			this.Cache[index][1] = superId;
+			this.Cache[index][2] = query;	
+			this.Cache[index][3] = data;
 		}
 		else{
 			int index = 0;

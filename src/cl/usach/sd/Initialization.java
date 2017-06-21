@@ -77,8 +77,8 @@ public class Initialization implements Control {
 		for(int i = 0; i < size; i++){
 			SNode3 node = (SNode3) Network.get(i);
 			node.setSuper_peer(1);
-			node.setCache(CacheInicialization());
-			node.setBD(BDInicialization());
+			node.setCache(this.CacheInicialization());
+			node.setBD(this.BDInicialization());
 			node.setPort(this.generatePort());
 			node.setMiSubNet( (int) node.getID());
 			try {
@@ -144,15 +144,16 @@ public class Initialization implements Control {
 	}
 	
 	/* Método para inicializar la caché
-	 * exclusivamente con -1
+	 * exclusivamente con -1 y con 0, para el conteo de LRU
 	 * */
 	private int[][] CacheInicialization(){
-		int[][] cache =  new int[this.CACHE_SIZE][4];
+		int[][] cache =  new int[this.CACHE_SIZE][5];
 		
 		for(int i = 0; i < this.CACHE_SIZE; i++){
-			for(int j = 0; j < 3; j++){
+			for(int j = 0; j < 4; j++){
 				cache[i][j] = -1;
 			}
+			cache[i][4] = 0;
 		}
 		return cache;
 	}
